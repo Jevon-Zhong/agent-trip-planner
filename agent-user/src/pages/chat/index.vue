@@ -7,12 +7,15 @@
         </view>
     </view>
     <!-- 欢迎界面 -->
-    <Welcome />
+    <!-- <Welcome /> -->
     <!-- 快速卡片 -->
-    <GridCard :cardData="cardData" />
+    <!-- <GridCard :cardData="cardData" /> -->
     <!-- 输入框 -->
     <ChatInput />
-
+    <!-- 对话窗口 -->
+    <Window />
+    <!-- 历史对话记录 -->
+    <History />
 </template>
 
 <script setup lang="ts">
@@ -22,6 +25,8 @@ import type { CardDataType } from '@/types'
 import Welcome from './components/welcome.vue'
 import GridCard from "./components/gridCard.vue"
 import ChatInput from "./components/chatInput.vue"
+import Window from "./components/window.vue"
+import History from "./components/history.vue"
 
 import iconA from "@/static/icon-a.png"
 import iconB from "@/static/icon-b.png"
@@ -58,31 +63,27 @@ const cardData = ref<CardDataType>([
 </script>
 
 <style scoped lang="less">
-page {
-    background-color: #dedfff;
+.menu-outer {
+    height: v-bind('height + "px"');
+    background-color: linear-gradient(#e7ebff, #dedfff);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
 
-    .menu-outer {
+    .button-top {
+        height: v-bind('top + "px"');
+    }
+
+    .menu-style {
+        display: flex;
+        align-items: center;
         height: v-bind('height + "px"');
-        background-color: linear-gradient(#e7ebff, #dedfff);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 999;
+        padding-left: 20rpx;
 
-        .button-top {
-            height: v-bind('top + "px"');
-        }
-
-        .menu-style {
-            display: flex;
-            align-items: center;
-            height: v-bind('height + "px"');
-            padding-left: 20rpx;
-
-            image {
-                width: 40rpx;
-            }
+        image {
+            width: 40rpx;
         }
     }
 }
