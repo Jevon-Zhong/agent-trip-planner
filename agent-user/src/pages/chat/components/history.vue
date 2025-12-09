@@ -10,8 +10,8 @@
         </view>
         <up-button :customStyle="{ width: '94%'}" text="新建对话"></up-button>
         <view class="history-title">历史对话</view>
-        <up-list>
-            <up-list-item v-for="(item, index) in 6" :key="index">
+        <up-list height="500">
+            <up-list-item v-for="(item, index) in 20" :key="index">
                 <view class="hostory-item">
                     <text>{{ `列表长度-${index + 1}` }}</text>
                 </view>
@@ -53,15 +53,14 @@ const close = () => {
 
 .history-title {
     font-size: 32rpx;
-    margin: 20rpx 20rpx 0rpx 20rpx;
+    margin: 20rpx 20rpx 10rpx 20rpx;
     font-weight: bold;
     color: purple;
 }
-
 .hostory-item {
     background-color: #fff;
     border-radius: 20rpx;
-    margin: 20rpx;
+    margin: 0 20rpx 20rpx 20rpx;
     padding: 20rpx;
 }
 </style>
