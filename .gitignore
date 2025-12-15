@@ -1,4 +1,9 @@
-# Logs
+# Python 字节码文件（原有规则）
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs（新增）
 logs
 *.log
 npm-debug.log*
@@ -7,12 +12,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# 前端/通用依赖&构建产物（新增）
 node_modules
-.DS_Store
 dist
 *.local
 
-# Editor directories and files
+# 系统/隐藏文件（新增）
+.DS_Store
+
+# 编辑器相关文件（新增）
 .idea
 *.suo
 *.ntvs*
