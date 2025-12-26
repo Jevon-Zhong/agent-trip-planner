@@ -10,7 +10,12 @@ from langgraph.graph import add_messages, StateGraph, START, END
 
 from tools import client
 from langchain_community.chat_models.tongyi import ChatTongyi
+from langchain_openai.chat_models import ChatOpenAI
 from typing_extensions import TypedDict, Annotated
+from fastapi import WebSocket
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.store.postgres.aio import AsyncPostgresStore
+from functools import partial
 
 load_dotenv()
 
@@ -21,8 +26,15 @@ API_KEY = os.getenv("API_KEY")
 tongyi = ChatTongyi(
     model='qwen3-max',
     api_key=API_KEY,
+    streaming=True
 )
 
+# tongyi = ChatOpenAI(
+#     model="qwen-plus",
+#     api_key=API_KEY,
+#     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+#     streaming=True
+# )
 
 # 工具类型
 class ToolInfo(TypedDict):
@@ -58,15 +70,16 @@ async def tool_node(state: MessagesState, tool_info: ToolInfo):
     # 取对话里的最后一条
     last_message = state["messages"][-1]
     task = [
-        tools_by_name[tool_call["name"]].ainvoke(tool_call['args']) for tool_call in last_message["tool_calls"]
+        tools_by_name[tool_call["name"]].ainvoke(tool_call['args']) for tool_call in last_message.tool_calls
     ]
     # 并发执行所有工具
     observations = await asyncio.gather(*task)
     tool_messages = [
         ToolMessage(content=observation, tool_call_id=tool_call["id"])
-        for observation, tool_call in zip(observations, last_message["tool_calls"])
+        for observation, tool_call in zip(observations, last_message.tool_calls)
     ]
     return {'messages': tool_messages}
+
 
 # 定义结束逻辑
 def should_continue(state: MessagesState):
@@ -80,16 +93,18 @@ def should_continue(state: MessagesState):
         return "tool_node"
 
     # Otherwise, we stop (reply to the user)
-    return 'end'
+    return END
+
 
 # 构建并编译agent，构建执行顺序
-def state_graph():
+def build_state_graph(checkpointer: AsyncPostgresSaver, store: AsyncPostgresStore,prompt: str, tool_info: ToolInfo):
     # Build workflow
-    agent_builder = StateGraph(MessagesState) # type: ignore
+    agent_builder = StateGraph(MessagesState)  # type: ignore
     # Add nodes
-    agent_builder.add_node("llm_call", llm_call) # type: ignore
-    agent_builder.add_node("tool_node", tool_node) # type: ignore
+    agent_builder.add_node("llm_call", partial(llm_call, prompt=prompt, tool_info=tool_info))  # type: ignore
+    agent_builder.add_node("tool_node", partial(tool_node, tool_info=tool_info))  # type: ignore
     # Add edges to connect nodes
+    agent_builder.add_edge(START, "llm_call")
     agent_builder.add_edge(START, "llm_call")
     agent_builder.add_conditional_edges(
         "llm_call",
@@ -97,6 +112,18 @@ def state_graph():
         ["tool_node", END]
     )
 
+    agent_builder.add_edge("tool_node", "llm_call")
+
     # Compile the agent
-    agent = agent_builder.compile()
+    agent = agent_builder.compile(checkpointer=checkpointer,
+                                  store=store,
+                                  )
     return agent
+
+
+# 获取全局缓存的工具数据
+def get_tool_list_ws(websocket: WebSocket) -> ToolInfo:
+    tool_info = getattr(websocket.app.state, 'tool_cache', None)
+    if tool_info is None:
+        raise RuntimeError('工具数据未找到')
+    return tool_info
