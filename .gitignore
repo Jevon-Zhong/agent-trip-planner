@@ -17,6 +17,12 @@ node_modules
 dist
 *.local
 
+# 图片文件（新增）
+*.png
+
+# 环境配置文件（修正：匹配所有层级的.env文件）
+.env
+
 # 系统/隐藏文件（新增）
 .DS_Store
 
