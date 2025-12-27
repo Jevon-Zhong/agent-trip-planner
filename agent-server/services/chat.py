@@ -3,9 +3,10 @@ import os
 from dotenv import load_dotenv
 from langchain_classic.chains.question_answering.map_reduce_prompt import messages
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, ToolMessage
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from model_prompt import prompt
+from models.conversations_list import ConversationsList
 from state_graph import ToolInfo, build_state_graph
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.store.postgres.aio import AsyncPostgresStore
@@ -25,8 +26,10 @@ tool_info: 工具数据
 """
 
 
-async def main_model(session_id: str, openid: str, content: str, session: Session, tool_info: ToolInfo):
+async def main_model(thread_id: str, openid: str, content: str, session: Session, tool_info: ToolInfo):
     print('main_model')
+    # 存储会话
+    await storage_conversation(thread_id, openid, content, session)
     # 数据库连接、建表
     async with (
         AsyncPostgresStore.from_conn_string(DB_URI) as store,
@@ -39,7 +42,7 @@ async def main_model(session_id: str, openid: str, content: str, session: Sessio
         # 会话id配置
         config = {
             "configurable": {
-                "thread_id": session_id,
+                "thread_id": thread_id,
                 "user_id": openid,
             }
         }
@@ -71,3 +74,20 @@ async def main_model(session_id: str, openid: str, content: str, session: Sessio
             elif isinstance(chunk, AIMessageChunk) and chunk.content:
                 # print(chunk.content + "----------------------")
                 yield {"role": "assistant", "content": chunk.content}
+
+
+# 存储会话
+async def storage_conversation(thread_id: str, openid: str, content: str, session: Session):
+    # 查询会话是否存在
+    get_conversations_list_statement = select(ConversationsList).where(
+        ConversationsList.openid == openid,
+        ConversationsList.thread_id == thread_id
+    )
+    conversations_list = session.exec(get_conversations_list_statement).first() # type: ignore
+    # 没有就创建
+    if not conversations_list:
+        conversations_storage = ConversationsList(openid=openid, thread_id=thread_id, title=content)
+        session.add(conversations_storage)
+        session.commit()
+
+

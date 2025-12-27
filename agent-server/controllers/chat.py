@@ -1,9 +1,14 @@
+import uuid
+
 from fastapi import APIRouter, WebSocket, Depends
-from sqlmodel import Session
+from fastapi.encoders import jsonable_encoder
+from sqlmodel import Session, select, desc
 from starlette.websockets import WebSocketDisconnect
 
+from core.response import response
 from database import get_session
-from jwt import decode_token_ws
+from jwt import decode_token_ws, decode_jwt
+from models.conversations_list import ConversationsList
 from services.chat import main_model
 from state_graph import ToolInfo, get_tool_list_ws
 
@@ -50,3 +55,16 @@ async def send_message(websocket: WebSocket, session: Session = Depends(get_sess
                 )
     except WebSocketDisconnect as error:
         print('用户断开连接', error)
+
+# 创建会话id
+@router.get('/create_conversation')
+async def create_conversation(openid:str=Depends(decode_jwt)):
+    session_id = str(uuid.uuid4())
+    return response({'sessionId': session_id})
+
+# 获取全部会话列表
+@router.get('/all_conversation_list')
+async def all_conversation_list(session: Session = Depends(get_session), openid:str=Depends(decode_jwt)):
+    statement = select(ConversationsList).where(ConversationsList.openid == openid).order_by(desc(ConversationsList.created_at))
+    res = session.exec(statement).all() # type: ignore
+    return response(jsonable_encoder(res))
