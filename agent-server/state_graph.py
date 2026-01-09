@@ -12,7 +12,7 @@ from tools import client
 from langchain_community.chat_models.tongyi import ChatTongyi
 from langchain_openai.chat_models import ChatOpenAI
 from typing_extensions import TypedDict, Annotated
-from fastapi import WebSocket
+from fastapi import WebSocket, Request
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.store.postgres.aio import AsyncPostgresStore
 from functools import partial
@@ -29,6 +29,13 @@ tongyi = ChatTongyi(
     streaming=True
 )
 
+# 获取经纬度接口专用
+tongyi_position = ChatTongyi(
+    model='qwen-max',
+    api_key=API_KEY
+)
+
+
 # tongyi = ChatOpenAI(
 #     model="qwen-plus",
 #     api_key=API_KEY,
@@ -40,6 +47,7 @@ tongyi = ChatTongyi(
 class ToolInfo(TypedDict):
     tools_by_name: dict[str, BaseTool]
     llm_with_tools: Runnable[LanguageModelInput, BaseMessage]
+    all_tools: list[BaseTool]
 
 
 # 定义状态
@@ -97,7 +105,8 @@ def should_continue(state: MessagesState):
 
 
 # 构建并编译agent，构建执行顺序
-def build_state_graph(checkpointer: AsyncPostgresSaver, store: AsyncPostgresStore,prompt: str, tool_info: ToolInfo):
+def build_state_graph(checkpointer: AsyncPostgresSaver, store: AsyncPostgresStore, prompt: str,
+                      tool_info: ToolInfo):
     # Build workflow
     agent_builder = StateGraph(MessagesState)  # type: ignore
     # Add nodes
@@ -121,9 +130,17 @@ def build_state_graph(checkpointer: AsyncPostgresSaver, store: AsyncPostgresStor
     return agent
 
 
-# 获取全局缓存的工具数据
+# 获取全局缓存的工具数据(websocket专用)
 def get_tool_list_ws(websocket: WebSocket) -> ToolInfo:
     tool_info = getattr(websocket.app.state, 'tool_cache', None)
+    if tool_info is None:
+        raise RuntimeError('工具数据未找到')
+    return tool_info
+
+
+# 获取全局缓存的工具数据(http专用)
+def get_tool_list_http(request: Request) -> ToolInfo:
+    tool_info = getattr(request.app.state, 'tool_cache', None)
     if tool_info is None:
         raise RuntimeError('工具数据未找到')
     return tool_info

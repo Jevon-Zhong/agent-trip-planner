@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     # print('所有工具', tools)
     # print('大模型读取工具', llm_with_tools)
     # 全局缓存工具
-    app.state.tool_cache = {'tools_by_name': tools_by_name, 'llm_with_tools': llm_with_tools} # type: ignore
+    app.state.tool_cache = {'tools_by_name': tools_by_name, 'llm_with_tools': llm_with_tools, "all_tools": tools} # type: ignore
     yield
     print('应用关闭时执行')
 

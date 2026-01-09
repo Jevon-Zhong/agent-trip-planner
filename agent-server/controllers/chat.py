@@ -9,8 +9,9 @@ from core.response import response
 from database import get_session
 from jwt import decode_token_ws, decode_jwt
 from models.conversations_list import ConversationsList
-from services.chat import main_model
-from state_graph import ToolInfo, get_tool_list_ws
+from schemas.chat import ConversationsDataParams, LocationDataParams
+from services.chat import main_model, conversation_detail, location_data
+from state_graph import ToolInfo, get_tool_list_ws, get_tool_list_http
 
 router = APIRouter(prefix="/chat", tags=["和大模型对话"])
 
@@ -68,3 +69,26 @@ async def all_conversation_list(session: Session = Depends(get_session), openid:
     statement = select(ConversationsList).where(ConversationsList.openid == openid).order_by(desc(ConversationsList.created_at))
     res = session.exec(statement).all() # type: ignore
     return response(jsonable_encoder(res))
+
+#获取某个会话下的对话记录数据
+@router.get('/get_conversation_detail/{session_id}')
+async def get_conversation_detail(session_id:str, openid:str=Depends(decode_jwt), tool_info:ToolInfo = Depends(get_tool_list_http)):
+    res = await conversation_detail(session_id, tool_info)
+    return response(res)
+
+"""
+用户： 帮我规划一个西安三日游
+
+模型：以下是我为你规划的一个西安三日游：
+第一天：秦始皇陵
+第二天：华清宫
+第三天：武则天乾陵
+"""
+
+# 获取经纬度数据
+@router.post('/get_location_data')
+async def get_location_data(req:LocationDataParams, openid:str=Depends(decode_jwt), tool_info:ToolInfo = Depends(get_tool_list_http)):
+    print(req.content)
+    res = await location_data(req.content, tool_info)
+    return response(res)
+
