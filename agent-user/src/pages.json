@@ -9,14 +9,14 @@
 	},
 	"pages": [
 		{
-			"path": "pages/chat/index",
+			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "uni-app",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/login/index",
+			"path": "pages/chat/index",
 			"style": {
 				"navigationBarTitleText": "uni-app",
 				"navigationStyle": "custom"
