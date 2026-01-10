@@ -36,8 +36,9 @@ const lineChange = (e: EventType) => {
     left: 0;
     right: 0;
     bottom: 0;
-    padding: 20rpx 20rpx 40rpx 20rpx;
+    padding: 20rpx 40rpx 70rpx 40rpx;
     z-index: 99;
+    background-color: #fff;
 
     .box {
         display: flex;

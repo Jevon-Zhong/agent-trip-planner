@@ -4,19 +4,19 @@
 		"custom": {
 			"^u--(.*)": "uview-plus/components/u-$1/u-$1.vue",
 			"^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
-	        "^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue"
+			"^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue"
 		}
 	},
 	"pages": [
 		{
-			"path": "pages/login/index",
+			"path": "pages/chat/index",
 			"style": {
 				"navigationBarTitleText": "uni-app",
 				"navigationStyle": "custom"
 			}
 		},
 		{
-			"path": "pages/chat/index",
+			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "uni-app",
 				"navigationStyle": "custom"

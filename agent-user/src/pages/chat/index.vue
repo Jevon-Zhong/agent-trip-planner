@@ -3,7 +3,7 @@
     <view class="menu-outer">
         <view class="button-top"></view>
         <view class="menu-style">
-            <image src="/static/chat-list.png" mode="widthFix" />
+            <image src="/static/chat-list.png" @click="switchFn" mode="widthFix" />
         </view>
     </view>
     <!-- 欢迎界面 -->
@@ -33,6 +33,9 @@ import iconB from "@/static/icon-b.png"
 import iconC from "@/static/icon-c.png"
 import iconD from "@/static/icon-d.png"
 
+import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
+
 const cardData = ref<CardDataType>([
     {
         icon: iconA,
@@ -60,12 +63,19 @@ const cardData = ref<CardDataType>([
     }
 
 ])
+
+const switchFn = () => {
+    appStore.switchHistoryAndChat = !appStore.switchHistoryAndChat
+    // console.log(appStore.switchHistoryAndChat)
+    console.log('点击')
+}
 </script>
 
 <style scoped lang="less">
 .menu-outer {
     height: v-bind('height + "px"');
-    background-color: linear-gradient(#e7ebff, #dedfff);
+    // background-color: linear-gradient(#e7ebff, #dedfff);
+    // background-color: #fff;
     position: fixed;
     top: 0;
     left: 0;
@@ -74,6 +84,8 @@ const cardData = ref<CardDataType>([
 
     .button-top {
         height: v-bind('top + "px"');
+        background-color: #fff;
+
     }
 
     .menu-style {
@@ -81,9 +93,11 @@ const cardData = ref<CardDataType>([
         align-items: center;
         height: v-bind('height + "px"');
         padding-left: 20rpx;
+        background-color: #fff;
 
         image {
             width: 40rpx;
+            padding: 10px;
         }
     }
 }

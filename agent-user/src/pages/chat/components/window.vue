@@ -1,23 +1,29 @@
 <template>
     <view class="outer">
-        <!-- 用户消息 -->
-        <view class="user-message">
-            <text>用户发送的消息</text>
-        </view>
-        <!-- 工具回复的消息 -->
-        <view class="tool-message">
-            <text>分析思考中</text>
-            <ToolSteps :tool-list="['第一个', '第二个']" />
-        </view>
-        <!-- 模型回复的消息 -->
-        <view class="ai-message">模型回复的消息模型回复的消息模型回复的消息模型回复的消息模型回复的消息模型回复的消息</view>
-        <!-- 地图数据 -->
+        <template v-for="(item, index) in appStore.messageList" :key="index">
+            <!-- 用户消息 -->
+            <view class="user-message" v-if="item.role === 'user'">
+                <text>{{ item.content }}</text>
+            </view>
+            <!-- 工具回复的消息 -->
+            <view class="tool-message" v-if="item.role === 'assistant' && item.toolList && item.toolList.length">
+                <text>{{ item.toolThinking ? '分析思考中...' : '分析思考完毕' }}</text>
+                <ToolSteps :tool-list="item.toolList" />
+            </view>
+            <!-- 模型回复的消息 -->
+            <view class="ai-message" v-if="item.role === 'assistant' && item.content != ''">
+                <up-markdown :content="item.content" />
+            </view>
+            <!-- 地图数据 -->
+        </template>
     </view>
 </template>
 
 <script setup lang="ts">
 import ToolSteps from './toolSteps.vue';
 const { top, bottom, right } = uni.getStorageSync("buttonPosition")
+import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
 </script>
 
 <style scoped lang="less">
@@ -26,6 +32,7 @@ const { top, bottom, right } = uni.getStorageSync("buttonPosition")
     display: flex;
     flex-direction: column;
     margin: 0 15rpx;
+    padding-bottom: 250rpx;
 
     .user-message {
         margin-top: 30rpx;

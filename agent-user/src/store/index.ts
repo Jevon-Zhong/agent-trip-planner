@@ -1,9 +1,13 @@
-import type { UserLoginResType } from '@/types'
+import type { ConversationListType, MessageListType, UserLoginResType } from '@/types'
 import { defineStore } from 'pinia'
 
-export const useUserStore = defineStore('user', {
+export const useAppStore = defineStore('app', {
     state: () => ({
         userInfo: null as UserLoginResType | null,
+        conversationList:[] as ConversationListType,
+        selectedThreadId: '',
+        switchHistoryAndChat: false,
+        messageList:[] as MessageListType[],//用户和模型的对话列表
     }),
     getters: {
 
@@ -14,7 +18,7 @@ export const useUserStore = defineStore('user', {
         },
     },
     persist: {
-        key: 'user_store',
+        key: 'app_store',
         // 2. 自定义存储方式（UniApp 推荐用 uniStorage，兼容多端）
         storage: {
             // 读取数据
@@ -22,6 +26,6 @@ export const useUserStore = defineStore('user', {
             // 存储数据
             setItem: (key, value) => uni.setStorageSync(key, value)
         },
-        pick: ['userInfo']
+        pick: ['userInfo', 'conversationList', 'selectedThreadId', 'messageList']
     }
 })

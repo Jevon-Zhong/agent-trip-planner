@@ -13,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import { uploadImageApi, userLoginApi } from '@/api/request';
+import { conversationListApi, uploadImageApi, userLoginApi } from '@/api/request';
 import type { AvatarEventType, LoginEventType } from '@/types';
 import { reactive, ref } from 'vue';
-import {useUserStore} from '@/store/index'
-const userStore = useUserStore()
+import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
 
 const login = async (event: LoginEventType) => {
     userInfo.nickname = event.detail.value.nickname
@@ -30,18 +30,27 @@ const login = async (event: LoginEventType) => {
         return
     }
     loading.value = true
-    console.log('登陆')
-    // 上传头像
-    const avatarRes = await uploadImageApi(userInfo.avatar)
-    console.log(avatarRes)
-    // 获取code
-    const code = await getCode()
-    // 登陆api
-    const loginRes = await userLoginApi({avatar: userInfo.avatar, nickname: userInfo.nickname, code})
-    console.log(loginRes)
-    // 存储本地缓存
-    userStore.userLogin(loginRes.data)
-
+    try {
+        console.log('登陆')
+        // 上传头像
+        const avatarRes: any = await uploadImageApi(userInfo.avatar)
+        console.log(avatarRes)
+        // 获取code
+        const code = await getCode()
+        // 登陆api
+        const loginRes = await userLoginApi({ avatar: avatarRes, nickname: userInfo.nickname, code })
+        console.log(loginRes)
+        // 存储本地缓存
+        appStore.userLogin(loginRes.data)
+        // 获取对话列表数据
+        const res = await conversationListApi()
+        console.log(res)
+        appStore.conversationList = res.data
+        // 返回上个页面
+        uni.navigateBack({ delta: 1 })
+    } catch (error) {
+        loading.value = false
+    }
 }
 
 //获取code

@@ -1,5 +1,6 @@
-import type { ApiResponse, UserLoginResType, UserLoginType } from "@/types"
-
+import type { AIMessageType, ApiResponse, ConversationListType, UserLoginResType, UserLoginType } from "@/types"
+import {useAppStore} from '@/store/index'
+const appStore = useAppStore()
 // 公共域名
 const baseUrl = 'http://127.0.0.1:8000'
 
@@ -27,6 +28,7 @@ const request = <T>(url: string, method: 'GET' | 'POST', data?: any): Promise<T>
             url: baseUrl + url,
             method,
             data,
+            header:{Authorization:"Bearer " + appStore.userInfo?.access_token},
             success: (res) => {
                 const status = res.statusCode
                 switch (status) {
@@ -79,3 +81,14 @@ const request = <T>(url: string, method: 'GET' | 'POST', data?: any): Promise<T>
 export const userLoginApi = (params: UserLoginType):Promise<ApiResponse<UserLoginResType>> => {
     return request('/user/login', 'POST', params)
 }
+
+// 获取对话列表数据
+export const conversationListApi = ():Promise<ApiResponse<ConversationListType>> => {
+    return request('/chat/all_conversation_list', 'GET')
+}
+
+// 获取对话列表数据
+export const conversationDetailApi = (thread_id: string):Promise<ApiResponse<AIMessageType[]>> => {
+    return request(`/chat/get_conversation_detail/${thread_id}`, 'GET')
+}
+
