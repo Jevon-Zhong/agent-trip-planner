@@ -23,10 +23,16 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 # 模型参数传递
-tongyi = ChatTongyi(
-    model='qwen3-max',
+# tongyi = ChatTongyi(
+#     model='qwen3-max',
+#     api_key=API_KEY,
+#     streaming=True
+# )
+
+tongyi = ChatOpenAI(
+    model="qwen3-max",
     api_key=API_KEY,
-    streaming=True
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
 # 获取经纬度接口专用
