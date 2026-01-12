@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
+
 onLaunch(() => {
   console.log("App Launch");
   // 获取胶囊按钮坐标
@@ -8,6 +11,9 @@ onLaunch(() => {
     const res = uni.getMenuButtonBoundingClientRect()
     // 存储本地缓存
     uni.setStorageSync('buttonPosition', res)
+  }
+  if (appStore.userInfo?.access_token) {
+    appStore.connectWebSocket()
   }
 
 });
@@ -20,5 +26,5 @@ onHide(() => {
 </script>
 <style lang="scss">
 /* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
-	@import "uview-plus/index.scss";
+@import "uview-plus/index.scss";
 </style>

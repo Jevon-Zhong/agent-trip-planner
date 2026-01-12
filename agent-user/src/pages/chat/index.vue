@@ -91,7 +91,7 @@ const switchFn = () => {
     .menu-style {
         display: flex;
         align-items: center;
-        height: v-bind('height + "px"');
+        height: v-bind('height+10+ "px"');
         padding-left: 20rpx;
         background-color: #fff;
 

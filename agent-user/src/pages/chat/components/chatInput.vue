@@ -12,13 +12,14 @@
 </template>
 
 <script setup lang="ts">
+import { sendMessageApi } from '@/api/request';
 import type { EventType } from '@/types';
 import { ref } from 'vue';
-
 const userMessage = ref('')
 
 const sendMessage = () => {
-    console.log(userMessage.value)
+    sendMessageApi(userMessage.value)
+    userMessage.value = ''
 }
 
 //输入框是否自动增高

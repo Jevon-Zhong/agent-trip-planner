@@ -46,6 +46,7 @@ const login = async (event: LoginEventType) => {
         const res = await conversationListApi()
         console.log(res)
         appStore.conversationList = res.data
+        appStore.connectWebSocket()
         // 返回上个页面
         uni.navigateBack({ delta: 1 })
     } catch (error) {

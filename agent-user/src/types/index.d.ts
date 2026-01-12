@@ -58,3 +58,8 @@ export type MessageListType = {
     modelSuccess?: boolean, // 模型是否回复成功
     toolList?:string[], // 返回的工具列表
 }
+
+// 获取会话详情接口数据类型
+export type createConversationType = {
+    sessionId: string
+}

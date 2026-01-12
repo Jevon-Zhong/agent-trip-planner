@@ -14,6 +14,9 @@
             <view class="ai-message" v-if="item.role === 'assistant' && item.content != ''">
                 <up-markdown :content="item.content" />
             </view>
+            <up-skeleton v-if="item.loading" style="margin-top: 30rpx;" rows="4" :loading="true" :title="false">
+                <up-text>loading为false时，将会展示此处插槽内容</up-text>
+            </up-skeleton>
             <!-- 地图数据 -->
         </template>
     </view>
