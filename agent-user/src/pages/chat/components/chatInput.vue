@@ -14,10 +14,13 @@
 <script setup lang="ts">
 import { sendMessageApi } from '@/api/request';
 import type { EventType } from '@/types';
+import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
 import { ref } from 'vue';
 const userMessage = ref('')
 
 const sendMessage = () => {
+    if (appStore.disabledStatus) return;
     sendMessageApi(userMessage.value)
     userMessage.value = ''
 }

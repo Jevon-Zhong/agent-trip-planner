@@ -8,7 +8,7 @@
                 <text>{{ appStore.userInfo?.nickname }}</text>
             </view>
         </view>
-        <up-button :customStyle="{ width: '94%' }" text="新建对话"></up-button>
+        <up-button :customStyle="{ width: '94%' }" text="新建对话" @click="newChat"></up-button>
         <view class="history-title">历史对话</view>
         <up-list height="500">
             <up-list-item v-for="(item, index) in appStore.conversationList" :key="item.thread_id">
@@ -24,10 +24,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAppStore } from '@/store/index'
+const appStore = useAppStore()
 import { onLoad } from '@dcloudio/uni-app';
 import { conversationDetailApi } from '@/api/request';
 import type { MessageListType } from '@/types';
-const appStore = useAppStore()
 const { top, bottom, right } = uni.getStorageSync("buttonPosition")
 const close = () => {
     // 关闭逻辑，设置 show 为 false  
@@ -70,6 +70,12 @@ const getContent = async (thread_id: string) => {
     newSessionData.value = []
     appStore.switchHistoryAndChat = false
 }
+
+const newChat = () => {
+    appStore.switchHistoryAndChat = false
+    appStore.messageList = []
+    appStore.selectedThreadId = ''
+}
 </script>
 
 <style scoped lang="less">
@@ -105,6 +111,13 @@ const getContent = async (thread_id: string) => {
     border-radius: 20rpx;
     margin: 0 20rpx 20rpx 20rpx;
     padding: 20rpx;
+
+    text {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+    }
 }
 
 .hostoryItemSelected {

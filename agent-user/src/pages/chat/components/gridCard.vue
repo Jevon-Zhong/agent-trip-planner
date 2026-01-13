@@ -1,6 +1,6 @@
 <template>
     <view class="card-outer">
-        <view class="box" v-for="item in cardData" :key="item.title">
+        <view class="box" v-for="item in cardData" :key="item.title" @click="sendMessage(item.prompt)">
             <image :src="item.icon" mode="widthFix" />
             <text class="title">{{ item.title }}</text>
             <text class="subtitle">{{ item.subtitle }}</text>
@@ -9,10 +9,15 @@
 </template>
 
 <script setup lang="ts">
+import { sendMessageApi } from '@/api/request';
 import type { CardDataType } from '@/types'
 
 // 2. 子组件定义Props（指定类型/默认值/校验）
 const props = defineProps<{ cardData: CardDataType }>()
+
+const sendMessage = (prompt: string) => {
+    sendMessageApi(prompt)
+}
 </script>
 
 <style scoped lang="less">

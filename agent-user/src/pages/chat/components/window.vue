@@ -41,13 +41,12 @@ const appStore = useAppStore()
         margin-top: 30rpx;
         max-width: 70%;
         align-self: flex-end;
-
+        background-color: #3a71e8;
+        padding: 10rpx;
+        color: #fff;
+        border-radius: 10rpx;
         text {
             line-height: 1.5;
-            background-color: #3a71e8;
-            border-radius: 10rpx;
-            color: #fff;
-            padding: 10rpx;
             font-size: 30rpx;
         }
     }

@@ -10,6 +10,7 @@ export const useAppStore = defineStore('app', {
         messageList: [] as MessageListType[],//用户和模型的对话列表
         isConnected: false, //ws是否连接上
         socket: null, //socket 对象
+        disabledStatus: false, // 模型对话是否禁用
     }),
     getters: {
 
@@ -56,7 +57,7 @@ export const useAppStore = defineStore('app', {
                     if (modelObj.role == 'end') {
                         aiMessageObj.toolThinking = false
                         aiMessageObj.loading = false
-                        aiMessageObj.modelSuccess = true
+                        this.disabledStatus = false
                         // 判断状态
                         const status = modelObj.code
                         switch (status) {

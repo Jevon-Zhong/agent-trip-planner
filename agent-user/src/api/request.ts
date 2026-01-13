@@ -86,6 +86,7 @@ export const sendMessageApi = async (userMessage: string) => {
         })
         return
     }
+    appStore.disabledStatus = true
     // 会话id为空就创建会话id
     if (appStore.selectedThreadId === '') {
         const res = await createConversationApi()
@@ -105,7 +106,6 @@ export const sendMessageApi = async (userMessage: string) => {
             loading: true,
             toolList: [],
             toolThinking: true,
-            modelSuccess: false
         }
     )
     appStore.sendWebSocketMessage(appStore.selectedThreadId, userMessage.trim())

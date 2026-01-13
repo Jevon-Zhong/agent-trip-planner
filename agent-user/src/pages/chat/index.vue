@@ -7,9 +7,9 @@
         </view>
     </view>
     <!-- 欢迎界面 -->
-    <!-- <Welcome /> -->
+    <Welcome v-if="appStore.selectedThreadId == ''" />
     <!-- 快速卡片 -->
-    <!-- <GridCard :cardData="cardData" /> -->
+    <GridCard :cardData="cardData" v-if="appStore.selectedThreadId == ''"/>
     <!-- 输入框 -->
     <ChatInput />
     <!-- 对话窗口 -->
@@ -65,6 +65,7 @@ const cardData = ref<CardDataType>([
 ])
 
 const switchFn = () => {
+    if (appStore.disabledStatus) return;
     appStore.switchHistoryAndChat = !appStore.switchHistoryAndChat
     // console.log(appStore.switchHistoryAndChat)
     console.log('点击')
