@@ -1,4 +1,4 @@
-import type { AIMessageType, ApiResponse, ConversationListType, createConversationType, UserLoginResType, UserLoginType } from "@/types"
+import type { AIMessageType, ApiResponse, ConversationListType, createConversationType, LocationDataType, UserLoginResType, UserLoginType } from "@/types"
 import { useAppStore } from '@/store/index'
 const appStore = useAppStore()
 // 公共域名
@@ -129,5 +129,10 @@ export const conversationDetailApi = (thread_id: string): Promise<ApiResponse<AI
 // 创建会话id
 export const createConversationApi = (): Promise<ApiResponse<createConversationType>> => {
     return request(`/chat/create_conversation`, 'GET')
+}
+
+// 获取经纬度数据
+export const getLoacationDataApi = (params: {content: string}): Promise<ApiResponse<LocationDataType>> => {
+    return request(`/chat/get_location_data`, 'POST', params)
 }
 
