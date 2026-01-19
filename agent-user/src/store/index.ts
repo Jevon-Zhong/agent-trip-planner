@@ -1,4 +1,4 @@
-import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType } from '@/types'
+import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType } from '@/types'
 import xingzou from '@/static/xingzou.png'
 import { defineStore } from 'pinia'
 const baseUrl_ws = 'ws://127.0.0.1:8000'
@@ -47,6 +47,38 @@ export const useAppStore = defineStore('app', {
                         aiMessageObj.toolThinking = false
                         aiMessageObj.toolList?.push(modelObj.content)
                     }
+                    // 如果有工具结果返回
+                    if (modelObj.role == "tool_result") {
+                        // 如果是地图数据
+                        const objRes = JSON.parse(res.data);
+                        console.log(objRes);
+                        // jsonMap：大模型返回的值 {"points": pl, "type": "route_polyline", "day": day, "marker": markers}
+                        let jsonMap: ModelMapType
+                        if (typeof objRes.content.null === 'string') {
+                            jsonMap = JSON.parse(objRes.content.null);
+                        } else {
+                            jsonMap = objRes.content.null; // 已是对象，直接使用
+                        }
+                        console.log('type1', typeof jsonMap === 'object')
+                        console.log('type2', jsonMap)
+                        console.log('type3', jsonMap.type)
+                        if (jsonMap.type && jsonMap.type === "route_polyline") {
+                            console.log('jsonMap', jsonMap)
+                            const newMapItem = this.makeUpMap(jsonMap);
+                            console.log('newMapItem', newMapItem)
+                            console.log('Object.keys(newMapItem)', Object.keys(newMapItem))
+                            console.log('Object.keys(newMapItem).length', Object.keys(newMapItem).length)
+                            if (Object.keys(newMapItem).length > 0) {
+                                if (aiMessageObj.mapDataList) {
+                                    aiMessageObj.mapDataList?.push(newMapItem);
+                                } else {
+                                    aiMessageObj.mapDataList = [newMapItem]
+                                }
+                            }
+                            console.log('innner_mapDataList', aiMessageObj.mapDataList)
+                        }
+                        console.log('mapDataList', aiMessageObj.mapDataList)
+                    }
                     // 大模型返回消息
                     if (modelObj.role === 'assistant') {
                         // 收到模型回复， 吧loading加载去掉
@@ -56,9 +88,6 @@ export const useAppStore = defineStore('app', {
                     }
                     // 如果大模型回复完毕或者出错
                     if (modelObj.role == 'end') {
-                        aiMessageObj.toolThinking = false
-                        aiMessageObj.loading = false
-                        aiMessageObj.modelSuccess = true
                         this.disabledStatus = false
                         // 判断状态
                         const status = modelObj.code
@@ -68,7 +97,7 @@ export const useAppStore = defineStore('app', {
                                 break;
                             case 401:
                                 uni.navigateTo({ url: '/pages/login/index' })
-                                aiMessageObj.content = '登陆后我再回复你'
+                                // aiMessageObj.content = '登陆后我再回复你'
                                 break;
                             case 422:
                                 uni.showToast({ icon: 'none', title: '请求参数不对' })
@@ -79,6 +108,9 @@ export const useAppStore = defineStore('app', {
                                 aiMessageObj.content = '服务器异常'
                                 break;
                         }
+                        aiMessageObj.toolThinking = false
+                        aiMessageObj.loading = false
+                        aiMessageObj.modelSuccess = true
                     }
                 });
 
@@ -113,9 +145,7 @@ export const useAppStore = defineStore('app', {
             }
         },
 
-        // parentIndex: 父组件传过来的index
-        // childIndex: 第几天对应的数据
-        // 切换第几天
+
         changeDay(parentIndex: number, childIndex: number) {
             const messageObj = this.messageList[parentIndex]
             const locationData = messageObj.locationData
@@ -165,7 +195,66 @@ export const useAppStore = defineStore('app', {
 
             })
 
+        },
+
+        // 根据大模型给的地图数据绘制地图
+        makeUpMap(jsonMap: ModelMapType) {
+            // 一天的地图数据
+            let oneDayMapData: MapDataType = {}
+            const points = jsonMap.points
+            const markers = jsonMap.marker
+            const day = jsonMap.day
+            // 如果大模型没有返回坐标点就返回空对象
+            if (points.length <= 0 || markers.length < 0) return {}
+            // 遍历数据中的标记点组装成地图需要的结构   `   `       
+            const markersData: MarkersType = []
+            const includePoints: IncludePpointsType = [];
+            markers.forEach(item => {
+                markersData.push({
+                    id: item.id,
+                    longitude: item.longitude,
+                    latitude: item.latitude,
+                    iconPath: xingzou,
+                    width: 30,
+                    height: 30,
+                    callout: {
+                        content: item.content,
+                        color: "#333",
+                        fontSize: 17,
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: "#ffffff",
+                        bgColor: "#888FB6",
+                        padding: 8,
+                        display: 'ALWAYS'
+                    }
+                })
+                includePoints.push({
+                    longitude: item.longitude,
+                    latitude: item.latitude
+                })
+            })
+            oneDayMapData = {
+                mapId: String(Date.now()),
+                day: day,
+                longitude: points[0].longitude,
+                latitude: points[0].latitude,
+                markers: markersData,
+                // 途经坐标点连线
+                polyline: [
+                    {
+                        points: points,
+                        color: "#858FB9",
+                        width: 6,
+                        borderColor: "#2f693c",
+                        borderWidth: 1,
+                    },
+                ],
+                includePoints: includePoints
+            }
+            return oneDayMapData
         }
+
     },
     persist: {
         key: 'app_store',

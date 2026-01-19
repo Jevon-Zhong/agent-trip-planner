@@ -13,21 +13,26 @@
             <!-- 模型回复的消息 -->
             <view class="ai-message" v-if="item.role === 'assistant' && item.content != ''">
                 <up-markdown :content="item.content" />
+                <!-- 地图 -->
+                <Map style="width: 100%;height: auto;" v-if="item.mapDataList && item.mapDataList.length > 0"
+                    :map-data-list="item.mapDataList" />
             </view>
             <up-skeleton v-if="item.loading" style="margin-top: 30rpx;" rows="4" :loading="true" :title="false">
                 <up-text>loading为false时，将会展示此处插槽内容</up-text>
             </up-skeleton>
             <!-- 地图数据 -->
-            <view class="view-map" v-if="item.role == 'assistant' && item.content && item.modelSuccess">
-                <Map style="width: 100%;height: auto;" :index="index" v-if="item.locationData && item.locationData.length > 0" />
-                <view class="map-seek" @click="getLoacationData(item.content, index)" v-if="!item.locationData && !item.mapLoading">
+            <!-- <view class="view-map" v-if="item.role == 'assistant' && item.content && item.modelSuccess">
+                <Map style="width: 100%;height: auto;" :index="index"
+                    v-if="item.locationData && item.locationData.length > 0" />
+                <view class="map-seek" @click="getLoacationData(item.content, index)"
+                    v-if="!item.locationData && !item.mapLoading">
                     <text>查看地图规划</text>
                     <text class="map-seek-text">点击查看</text>
                 </view>
                 <up-skeleton v-if="item.mapLoading" style="margin-top: 30rpx;" rows="4" :loading="true" :title="false">
                     <up-text>loading为false时，将会展示此处插槽内容</up-text>
                 </up-skeleton>
-            </view>
+            </view> -->
         </template>
     </view>
 </template>

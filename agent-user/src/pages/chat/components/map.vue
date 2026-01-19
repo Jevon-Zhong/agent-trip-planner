@@ -1,16 +1,14 @@
 <template>
     <view class="map-view">
-        <text>路线地图</text>
-        <map class="map-style" :id="appStore.messageList[index].mapId"
-            :longitude="appStore.messageList[index].longitude" :latitude="appStore.messageList[index].latitude"
-            :markers="appStore.messageList[index].markers" :polyline="appStore.messageList[index].polyline"
-            :include-points="appStore.messageList[index].includePpoints" />
+        <view style="margin-bottom: 10rpx; color: #404564;">路线地图</view>
+        <map class="map-style" :id="mapDataList[selectIndex].mapId"
+            :longitude="mapDataList[selectIndex].longitude" :latitude="mapDataList[selectIndex].latitude"
+            :markers="mapDataList[selectIndex].markers" :polyline="mapDataList[selectIndex].polyline"
+            :include-points="mapDataList[selectIndex].includePoints" />
 
         <!-- 切换天数 -->
-        <view class="item-day"
-            v-if="appStore.messageList[index].locationData && appStore.messageList[index].locationData!.length > 0">
-            <text v-for="(item, index1) in appStore.messageList[index].locationData" :key="index1"
-                :class="{ 'select-day': index === selectIndex }" @click="changeDay(index, index1)">
+        <view class="item-day">
+            <text v-for="(item, index) in mapDataList" :class="{ 'select-day': index === selectIndex }" @click="changeDay(index)">
                 {{ item.day }}
             </text>
         </view>
@@ -19,25 +17,27 @@
 
 <script setup lang="ts">
 import { useAppStore } from '@/store/index'
+import type { MapDataType } from '@/types';
 import { ref } from 'vue';
 const appStore = useAppStore()
 const selectIndex = ref(0)
-// 父组件传递过来的对话index
-defineProps<{
-    index: number
-}>()
+// 父级下标
+const prop = defineProps<{
+    mapDataList: MapDataType[];
+}>();
 
-const changeDay = (index: number, index1: number) => {
-    const messageObj = appStore.messageList[index]
-    messageObj.mapLoading = true
-    appStore.changeDay(index, index1)
-    messageObj.mapLoading = false
+const changeDay = (index: number) => {
+    selectIndex.value = index
 }
 </script>
 
 <style scoped lang="less">
 .map-view {
     border-radius: 20rpx;
+    // box-shadow:4px 4px 15px #cbcbcb;
+    border: 1rpx solid #cbcbcb;
+    padding: 20rpx;
+    box-sizing: border-box;
 
     .map-title {
         padding-bottom: 20rpx;
@@ -47,29 +47,29 @@ const changeDay = (index: number, index1: number) => {
 
     .map-style {
         width: 100%;
-        height: 450rpx;
+        height: 480rpx;
     }
 
     .item-day {
         display: flex;
         align-items: center;
-        background-color: magenta;
         border-radius: 10rpx;
-        margin-top: 20rpx;
-        color: #fff;
+        margin: 15rpx 0;
 
         text {
+            color: #333;
             font-size: 27rpx;
             padding: 7rpx 15rpx;
+            border: 1rpx solid #eeee;
             border-radius: 10rpx;
-            margin: 10rpx;
-            background: none;
+            box-sizing: border-box;
+            margin-right: 10rpx;
         }
     }
 
     .select-day {
-        background-color: #fff;
-        color: black;
+        background-color: #888fb6;
+        color: #ffffff;
     }
 
 }

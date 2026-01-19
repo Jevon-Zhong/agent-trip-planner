@@ -45,7 +45,7 @@ export type ConversationListType = {
 // 获取会话详情接口数据类型
 export type AIMessageType = {
     role: 'user' | 'tool' | 'tool_result' | 'assistant' | 'end',
-    content: string
+    content: any
     code?: number
 }
 
@@ -58,15 +58,20 @@ export type MessageListType = {
     modelSuccess?: boolean // 模型是否回复成功（用于地图展示）
     toolList?: string[] // 返回的工具列表
     //地图展示
-    mapId?: string //地图id
-    longitude?: number //经度
-    latitude?: number //维度
-    markers?: MarkersType //标记点
-    polyline?: PolylineType //坐标点连线
-    includePpoints?: IncludePpointsType //缩放视野以包含所有给定的坐标点
-    mapLoading?: boolean //地图数据是否请求成功
-    locationData?: LocationDataType //存储地图路线经纬度数据
+    mapDataList?: MapDataType[];
 }
+
+export type MapDataType = {
+  day?: string; //第几天
+  mapId?: string; //地图id
+  longitude?: number; //经度
+  latitude?: number; //纬度
+  markers?: MarkersType; // 用于在地图上显示标记的位置
+  polyline?: PolylineType; // 坐标点连线
+  includePoints?: IncludePointsType; // 缩放视野以包含所有给定的坐标点
+  mapLoading?: boolean; //地图数据是否请求成功
+  locationData?: LocationDataType; // 存储地图路线经纬度数据
+};
 
 // markers 类型
 export type MarkersType = {
@@ -82,12 +87,16 @@ export type MarkersType = {
 // polyline类型
 export type PolylineType = {
     points: { latitude: number, longitude: number }[]
+    borderColor: string
+    borderWidth: number
     color: string
     width: number
 }[]
 
 type CalloutType = {
     content: string
+    fontSize: number;
+    borderWidth: number;
     color: string
     borderRadius: number
     borderColor: string
@@ -116,3 +125,19 @@ export type LocationDataType = {
 export type createConversationType = {
     sessionId: string
 }
+
+// 模型返回的地图数据结构
+export type ModelMapType = {
+  points: {
+    latitude: number;
+    longitude: number;
+  }[];
+  type: string;
+  day: string;
+  marker: {
+    id: number; // id表示对应每个景点的id，随机数生成不重复，可使用时间戳，数字类型
+    latitude: number;
+    longitude: number;
+    content: string; //景点名称
+  }[];
+};

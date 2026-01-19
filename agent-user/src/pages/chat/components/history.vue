@@ -27,7 +27,7 @@ import { useAppStore } from '@/store/index'
 const appStore = useAppStore()
 import { onLoad } from '@dcloudio/uni-app';
 import { conversationDetailApi } from '@/api/request';
-import type { MessageListType } from '@/types';
+import type { MapDataType, MessageListType, ModelMapType } from '@/types';
 const { top, bottom, right } = uni.getStorageSync("buttonPosition")
 const close = () => {
     // 关闭逻辑，设置 show 为 false  
@@ -37,6 +37,8 @@ const close = () => {
 const newSessionData = ref<MessageListType[]>([])
 //临时存储工具名称列表
 const toolList = ref<string[]>([])
+//临时存储每一天的地图路线数据
+const mapDataList = ref<MapDataType[]>([])
 const getContent = async (thread_id: string) => {
     const res = await conversationDetailApi(thread_id)
     console.log(res)
@@ -52,12 +54,52 @@ const getContent = async (thread_id: string) => {
         // 如果是模型消息
         if (item.role === 'assistant') {
             newSessionData.value.push(item)
-            if (toolList.value?.length > 0) {
-                const lastObj = newSessionData.value[newSessionData.value.length - 1]
+            // 处理工具名单
+            let lastObj
+            if (toolList.value.length > 0) {
+                lastObj = newSessionData.value[newSessionData.value.length - 1]
                 if (lastObj) {
                     lastObj.toolList = toolList.value
                 }
                 toolList.value = []
+            }
+            // 处理地图位置（与哪条消息合并）
+            if (mapDataList.value.length > 0) {
+                if (lastObj?.toolList?.includes('map_data')) {
+                    lastObj.mapDataList = mapDataList.value
+                }
+            }
+        }
+        // 如果是工具返回结果
+        if (item.role === 'tool_result') {
+            console.log('触发tool_result')
+            let jsonMap: ModelMapType
+            if (typeof item.content.null === 'string') {
+                jsonMap = JSON.parse(item.content.null);
+            } else {
+                jsonMap = item.content.null; // 已是对象，直接使用
+            }
+            // 将每一天的地图数据返回存储到mapDataList
+            if (jsonMap.type && jsonMap.type === "route_polyline") {
+                console.log('jsonMap', jsonMap)
+                const newMapItem = appStore.makeUpMap(jsonMap);
+                console.log('newMapItem', newMapItem)
+                console.log('Object.keys(newMapItem)', Object.keys(newMapItem))
+                console.log('Object.keys(newMapItem).length', Object.keys(newMapItem).length)
+                if (Object.keys(newMapItem).length > 0) {
+                    mapDataList.value.push(newMapItem)
+                    // const lastObj = newSessionData.value[newSessionData.value.length - 1]
+                    // console.log('lastObj', lastObj)
+                    // if (lastObj) {
+                    //     if (lastObj.mapDataList) {
+                    //         lastObj.mapDataList.push(newMapItem);
+                    //     } else {
+                    //         lastObj.mapDataList = [newMapItem]
+                    //     }
+                    //     console.log('lastObj.mapDataList', lastObj)
+                    // }
+                    // console.log('tool_result', lastObj)
+                }
             }
         }
     })

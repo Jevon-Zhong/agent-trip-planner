@@ -121,7 +121,7 @@ export const conversationListApi = (): Promise<ApiResponse<ConversationListType>
     return request('/chat/all_conversation_list', 'GET')
 }
 
-// 获取对话列表数据
+// 获取对话详情数据
 export const conversationDetailApi = (thread_id: string): Promise<ApiResponse<AIMessageType[]>> => {
     return request(`/chat/get_conversation_detail/${thread_id}`, 'GET')
 }
