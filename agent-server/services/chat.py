@@ -115,7 +115,7 @@ async def conversation_detail(thread_id: str, tool_info: ToolInfo):
         history = []
         # 请求历史对话数据
         async for snap in graph.aget_state_history(config):
-            print(snap, '+' * 50)
+            # print(snap, '+' * 50)
             history.append(snap)
         if not history:
             return []

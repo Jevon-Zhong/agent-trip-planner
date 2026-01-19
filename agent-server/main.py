@@ -12,7 +12,7 @@ from database import init_db
 from fastapi.staticfiles import StaticFiles
 
 # 引入mcp工具
-from state_graph import client, tongyi
+from state_graph import client, tongyi, map_data
 
 # 生命周期管瘤
 @asynccontextmanager
@@ -22,6 +22,7 @@ async def lifespan(app: FastAPI):
     print('应用启动时执行')
     # 读取mcp工具
     tools = await client.get_tools()
+    tools += [map_data]
     # 大模型读取工具
     llm_with_tools = tongyi.bind_tools(tools)
     # 大模型绑定的工具
