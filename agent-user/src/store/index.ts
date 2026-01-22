@@ -12,6 +12,10 @@ export const useAppStore = defineStore('app', {
         isConnected: false, //ws是否连接上
         socket: null, //socket 对象
         disabledStatus: false, // 模型对话是否禁用
+        // 临时存储工具列表
+        toolList: [] as any,
+        // 上一条是否是ai消息
+        lastAssistantFlag: true
     }),
     getters: {
 
@@ -40,15 +44,31 @@ export const useAppStore = defineStore('app', {
                     console.log('收到WebSocket服务器消息：', res.data);
                     const modelObj = JSON.parse(res.data) as AIMessageType
                     //取对话最后一项,即之前预填的ai信息
-                    const aiMessageObj = this.messageList[this.messageList.length - 1]
+                    // const aiMessageObj = this.messageList[this.messageList.length - 1]
                     // 如果是工具返回
                     if (modelObj.role == 'tool') {
-                        // 收到模型回复， 吧loading加载去掉
-                        aiMessageObj.toolThinking = false
+                        // // 收到模型回复， 吧loading加载去掉
+                        // aiMessageObj.toolThinking = false
+                        // aiMessageObj.toolList?.push(modelObj.content)
+
+                        // 上一条是ai消息，那就可以创建个新模板
+                        if (this.lastAssistantFlag) {
+                            this.messageList.push({
+                                role: 'assistant',
+                                content: '',
+                                loading: true,
+                                toolList: [],
+                                toolThinking: true,
+                            })
+                        }
+                        const aiMessageObj = this.messageList[this.messageList.length - 1]
+                        // 把工具信息组装进去
                         aiMessageObj.toolList?.push(modelObj.content)
+                        this.lastAssistantFlag = false
                     }
                     // 如果有工具结果返回
                     if (modelObj.role == "tool_result") {
+                        const aiMessageObj = this.messageList[this.messageList.length - 1]
                         // 如果是地图数据
                         const objRes = JSON.parse(res.data);
                         console.log(objRes);
@@ -81,13 +101,32 @@ export const useAppStore = defineStore('app', {
                     }
                     // 大模型返回消息
                     if (modelObj.role === 'assistant') {
+                        const aiMessageObj = this.messageList[this.messageList.length - 1]
+                        // // 上一条不是ai消息，并且messageList里没有插入空模板，消息列表需要新插入空消息模板
+                        // if (!lastAssistantFlag && aiMessageObj.role != 'assistant') {
+                        //     this.messageList.push({
+                        //         role: 'assistant',
+                        //         content: '',
+                        //         loading: true,
+                        //         toolList: [],
+                        //         toolThinking: true,
+                        //     })
+                        //     // 把工具信息组装进去
+                        //     if (this.toolList.length > 0) {
+                        //         aiMessageObj.toolList = this.toolList
+                        //         this.toolList = []
+                        //     }
+                        // }
+
                         // 收到模型回复， 吧loading加载去掉
                         aiMessageObj.toolThinking = false
                         aiMessageObj.loading = false
                         aiMessageObj.content += modelObj.content
+                        this.lastAssistantFlag = true
                     }
                     // 如果大模型回复完毕或者出错
                     if (modelObj.role == 'end') {
+                        const aiMessageObj = this.messageList[this.messageList.length - 1]
                         this.disabledStatus = false
                         // 判断状态
                         const status = modelObj.code
