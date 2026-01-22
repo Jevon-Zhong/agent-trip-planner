@@ -8,6 +8,7 @@ load_dotenv()
 
 # 读取环境变量
 API_KEY = os.getenv("API_KEY")
+APPCODE = os.getenv("APPCODE")
 
 client = MultiServerMCPClient(
     {
@@ -28,6 +29,12 @@ client = MultiServerMCPClient(
             "url": "https://dashscope.aliyuncs.com/api/v1/mcps/china-railway/sse",
             "headers": {"Authorization": f"Bearer {API_KEY}"},
             "transport": "sse"
+        },
+        # 搜索图片
+        "geng-search-image": {
+            "url": "https://ai.weiniai.cn/search-image",
+            "transport": "streamable_http",
+            "headers": {"Authorization": f"Bearer {APPCODE}"},
         },
     }
 )

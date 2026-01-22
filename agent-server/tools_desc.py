@@ -21,4 +21,6 @@ TOOL_LIST = {
     "maps_text_search": "关键词搜索 POI",
     "maps_around_search": "搜索周边城市",
     "bailian_web_search": "搜索景点数据",
+    "map_data": "获取地图路线",
+    "search-image": "搜索图片"
 }
