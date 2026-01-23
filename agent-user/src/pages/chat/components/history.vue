@@ -3,8 +3,9 @@
         :customStyle="{ marginTop: `${bottom + 10}px`, width: '600rpx' }"
         :overlayStyle="{ marginTop: `${bottom + 10}px` }" mode="left" zIndex="99">
         <view>
-            <view class="user-info">
-                <image :src="appStore.userInfo?.avatar" mode="aspectFill" />
+            <view class="user-info" @click="show = true">
+                <up-avatar :src="appStore.userInfo?.avatar" shape="square"></up-avatar>
+                <!-- <image :src="appStore.userInfo?.avatar" mode="aspectFill" /> -->
                 <text>{{ appStore.userInfo?.nickname }}</text>
             </view>
         </view>
@@ -35,6 +36,8 @@
     <up-loading-page style="z-index: 99999999;" bg-color="#0000002e" :loading="loading"></up-loading-page>
     <up-notify message="删除失败" ref="uNotifyRef" type="error"></up-notify>
     <up-toast ref="uToastRef"></up-toast>
+    <up-action-sheet :show="show" @select="selectClick" @close="show = false" :actions="actions"
+        cancelText="取消"></up-action-sheet>
 </template>
 
 <script setup lang="ts">
@@ -171,6 +174,20 @@ const deleteSession = async (sessionId: string) => {
     }
 
 }
+
+const show = ref(false)
+
+const actions = ref([{
+    name: '退出登陆',
+},
+])
+
+const selectClick = (index: { name: string }) => {
+    if (index.name = '退出登陆') {
+        appStore.userInfo = null
+        uni.navigateTo({ url: '/pages/login/index' })
+    }
+};  
 </script>
 
 <style scoped lang="less">
