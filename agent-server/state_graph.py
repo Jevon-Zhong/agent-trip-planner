@@ -35,14 +35,14 @@ QQ_MAP_KEY = os.getenv("QQ_MAP_KEY")
 # )
 
 tongyi = ChatOpenAI(
-    model="glm-4.7",
+    model="qwen-plus-2025-12-01",
     api_key=API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
 # 获取经纬度接口专用
 tongyi_position = ChatTongyi(
-    model='glm-4.7',
+    model='qwen-plus-2025-12-01',
     api_key=API_KEY
 )
 

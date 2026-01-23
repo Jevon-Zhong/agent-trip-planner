@@ -1,12 +1,13 @@
 import asyncio
 import json
 import os
+from typing import Dict, Any
 
 from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain_classic.chains.question_answering.map_reduce_prompt import messages
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, ToolMessage
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete, and_
 
 from model_prompt import prompt, map_prompt
 from models.conversations_list import ConversationsList
@@ -86,12 +87,73 @@ async def storage_conversation(thread_id: str, openid: str, content: str, sessio
         ConversationsList.openid == openid,
         ConversationsList.thread_id == thread_id
     )
-    conversations_list = session.exec(get_conversations_list_statement).first() # type: ignore
+    conversations_list = session.exec(get_conversations_list_statement).first()  # type: ignore
     # 没有就创建
     if not conversations_list:
         conversations_storage = ConversationsList(openid=openid, thread_id=thread_id, title=content)
         session.add(conversations_storage)
         session.commit()
+
+
+async def delete_conversation_from_list(
+        thread_id: str,
+        openid: str,
+        session: Session
+) -> Dict[str, Any]:
+    """
+    从 ConversationsList 表中删除指定 thread_id + openid 对应的会话记录
+    :param thread_id: 要删除的会话ID
+    :param openid: 用户唯一标识（和存储逻辑对齐，避免误删）
+    :param session: SQLAlchemy 的 Session 实例
+    :return: 删除结果（是否成功、影响行数）
+    """
+    # 1. 入参校验
+    if not thread_id or not openid:
+        return {
+            "success": False,
+            "message": "thread_id 和 openid 不能为空",
+            "affected_rows": 0
+        }
+
+    try:
+        # 2. 先查询确认记录存在（可选，便于返回更精准的提示）
+        get_statement = select(ConversationsList).where(
+            ConversationsList.openid == openid,
+            ConversationsList.thread_id == thread_id
+        )
+        existing_record = session.exec(get_statement).first()  # type: ignore
+        if not existing_record:
+            print(f"ConversationsList 中无 thread_id={thread_id} + openid={openid} 的记录，无需删除")
+            return {
+                "msg": f"ConversationsList 中无 thread_id={thread_id} + openid={openid} 的记录，无需删除",
+            }
+
+        # 3. 执行删除操作（使用 delete 语句，精准匹配）
+        delete_statement = delete(ConversationsList).where(
+            and_(ConversationsList.openid == openid,
+                 ConversationsList.thread_id == thread_id
+                 )
+        )
+        # 执行删除并获取影响的行数
+        result = session.exec(delete_statement)
+        # 提交事务（和你存储会话的 commit 逻辑一致）
+        session.commit()
+
+        affected_rows = result.rowcount
+        print(f"成功删除 ConversationsList 中 thread_id={thread_id} 的记录，影响行数：{affected_rows}")
+        return {
+            "msg": f"成功删除 ConversationsList 中 thread_id={thread_id} 的记录，影响行数：{affected_rows}",
+            "data": affected_rows
+        }
+
+    except Exception as e:
+        # 异常时回滚事务，避免数据不一致
+        session.rollback()
+        print(f"删除 ConversationsList 记录失败：{str(e)}")
+        return {
+            "msg": f"删除 ConversationsList 记录失败：{str(e)}",
+            "data": 0
+        }
 
 
 # 获取某个会话下的对话记录数据
@@ -137,15 +199,74 @@ async def conversation_detail(thread_id: str, tool_info: ToolInfo):
                 if getattr(item, "tool_calls", None):
                     for call in item.tool_calls:
                         tool_name = call["name"]
-                        formatted.append({"role":"tool","content":tool_name})
+                        formatted.append({"role": "tool", "content": tool_name})
             # 获取工具结果
             elif isinstance(item, ToolMessage):
                 formatted.append({"role": "tool_result", "content": {item.name: item.content}})
         return formatted
 
 
+# 删除某条对话记录
+async def delete_conversation_by_thread_id(thread_id: str, session: Session, openid: str, tool_info: ToolInfo):
+    """
+    删除指定 thread_id 对应的所有对话数据（checkpoint + 关联存储数据）
+    :param thread_id: 要删除的会话ID
+    :param tool_info: 工具信息（和你原代码保持一致的入参）
+    :return: dict - 删除结果（是否成功、删除的checkpoint数量）
+    """
+    if not thread_id:
+        return {
+            "data": [],
+            "code": 404,
+            "msg": 'thread_id 不能为空'
+        }
+
+    try:
+        # 复用你原代码的数据库连接方式
+        async with (
+            AsyncPostgresStore.from_conn_string(DB_URI) as store,
+            AsyncPostgresSaver.from_conn_string(DB_URI) as checkpointer,
+        ):
+            await store.setup()
+            await checkpointer.setup()
+
+            # 核心：调用官方 delete_thread 方法删除该 thread_id 的所有 checkpoint
+            # 该方法会自动筛选并删除该 thread_id 下的所有 checkpoint 数据
+            await checkpointer.adelete_thread(thread_id)
+
+            # 步骤2：删除 ConversationsList 中的记录（即使checkpoint删失败，也可按需调整逻辑）
+            await delete_conversation_from_list(thread_id, openid, session)
+
+            # （可选）验证删除结果：查询该 thread_id 是否还有数据
+            config = {
+                "configurable": {
+                    "thread_id": thread_id,
+                }
+            }
+            # 构建图（用于验证）
+            graph = build_state_graph(checkpointer, store, prompt, tool_info)
+            # 检查是否还有剩余的状态快照
+            remaining_snaps = []
+            async for snap in graph.aget_state_history(config):
+                remaining_snaps.append(snap)
+
+            deleted_count = len(remaining_snaps) == 0
+            return {
+                "data": [],
+                "msg": f"thread_id={thread_id} 的对话数据已成功删除"
+            }
+
+    except Exception as e:
+        # 捕获并返回异常信息，方便排查问题
+        return {
+            "data": [],
+            "code": 500,
+            "msg": f"删除失败：{str(e)}"
+        }
+
+
 # 获取经纬度数据
-async def location_data(content:str, tool_info:ToolInfo):
+async def location_data(content: str, tool_info: ToolInfo):
     print("进入")
     try:
         agent = create_agent(
@@ -154,7 +275,7 @@ async def location_data(content:str, tool_info:ToolInfo):
             tools=tool_info["all_tools"]
         )
         res = await agent.ainvoke(
-            {"messages": [{"role": "user", "content": content}]} # type: ignore
+            {"messages": [{"role": "user", "content": content}]}  # type: ignore
         )
         print(res)
         ai_msg = next(
@@ -171,7 +292,3 @@ async def location_data(content:str, tool_info:ToolInfo):
     except Exception as e:
         print(e)
         return []
-
-
-
-
