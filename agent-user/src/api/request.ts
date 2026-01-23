@@ -1,8 +1,7 @@
 import type { AIMessageType, ApiResponse, ConversationListType, createConversationType, LocationDataType, UserLoginResType, UserLoginType } from "@/types"
 import { useAppStore } from '@/store/index'
-const appStore = useAppStore()
 // 公共域名
-const baseUrl = 'http://127.0.0.1:8000'
+const baseUrl = 'http://10.149.185.115:8000'
 
 // 图片上传（头像）
 export const uploadImageApi = (url: string) => {
@@ -22,7 +21,8 @@ export const uploadImageApi = (url: string) => {
 }
 
 // 公用网络请求
-const request = <T>(url: string, method: 'GET' | 'POST', data?: any): Promise<T> => {
+const request = <T>(url: string, method: 'GET' | 'POST' | 'DELETE', data?: any): Promise<T> => {
+    const appStore = useAppStore()
     return new Promise((resolve, reject) => {
         uni.request({
             url: baseUrl + url,
@@ -79,6 +79,7 @@ const request = <T>(url: string, method: 'GET' | 'POST', data?: any): Promise<T>
 
 // websocket发送消息
 export const sendMessageApi = async (userMessage: string) => {
+    const appStore = useAppStore()
     if (userMessage.trim() === '') {
         uni.showToast({
             icon: 'none',
@@ -134,5 +135,10 @@ export const createConversationApi = (): Promise<ApiResponse<createConversationT
 // 获取经纬度数据
 export const getLoacationDataApi = (params: {content: string}): Promise<ApiResponse<LocationDataType>> => {
     return request(`/chat/get_location_data`, 'POST', params)
+}
+
+// 删除会话
+export const deleteConversationApi = (thread_id: string): Promise<ApiResponse<[]>> => {
+    return request(`/chat/delete_conversation/${thread_id}`, 'DELETE')
 }
 

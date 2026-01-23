@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
 import { useAppStore } from '@/store/index'
+import { conversationListApi } from "./api/request";
 const appStore = useAppStore()
 
-onLaunch(() => {
+onLaunch(async () => {
   console.log("App Launch");
   // 获取胶囊按钮坐标
   const buttonPosition = uni.getStorageSync('buttonPosition')
@@ -11,6 +12,12 @@ onLaunch(() => {
     const res = uni.getMenuButtonBoundingClientRect()
     // 存储本地缓存
     uni.setStorageSync('buttonPosition', res)
+  }
+  // 获取对话列表数据
+  const res = await conversationListApi()
+  appStore.conversationList = res.data
+  if (appStore.selectedThreadId != '') {
+    appStore.getContent(appStore.selectedThreadId)
   }
   if (appStore.userInfo?.access_token) {
     appStore.connectWebSocket()

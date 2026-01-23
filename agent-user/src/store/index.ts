@@ -1,7 +1,8 @@
 import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType } from '@/types'
 import xingzou from '@/static/xingzou.png'
 import { defineStore } from 'pinia'
-const baseUrl_ws = 'ws://127.0.0.1:8000'
+import { conversationDetailApi } from '@/api/request'
+const baseUrl_ws = 'ws://10.149.185.115:8000'
 export const useAppStore = defineStore('app', {
     state: () => ({
         userInfo: null as UserLoginResType | null,
@@ -15,7 +16,13 @@ export const useAppStore = defineStore('app', {
         // 临时存储工具列表
         toolList: [] as any,
         // 上一条是否是ai消息
-        lastAssistantFlag: true
+        lastAssistantFlag: true,
+        // 临时存储对话历史数据
+        newSessionData: [] as MessageListType[],
+        // 临时存储对话历史数据的工具
+        historyToolList: [] as string[],
+        //临时存储每一天的地图路线数据
+        mapDataList: [] as MapDataType[]
     }),
     getters: {
 
@@ -185,56 +192,56 @@ export const useAppStore = defineStore('app', {
         },
 
 
-        changeDay(parentIndex: number, childIndex: number) {
-            const messageObj = this.messageList[parentIndex]
-            const locationData = messageObj.locationData
-            const points: IncludePpointsType = []
-            // 默认展示第一天
-            messageObj.longitude = locationData![0].location[0].longitude
-            messageObj.latitude = locationData![0].location[0].latitude
-            // 重制数据
-            messageObj.markers = []
-            messageObj.polyline = []
-            // 地图赋值第n天数据
-            locationData![childIndex].location.forEach((item, index) => {
-                // includePpoints
-                messageObj.includePpoints?.push({
-                    longitude: item.longitude,
-                    latitude: item.latitude
-                })
-                // 
-                messageObj.markers?.push({
-                    id: Date.now() + index,
-                    longitude: item.longitude,
-                    latitude: item.latitude,
-                    iconPath: xingzou,
-                    width: 30,
-                    height: 30,
-                    callout: {
-                        content: item.city,
-                        color: '#fff',
-                        borderRadius: 3,
-                        borderColor: '#ff00bf',
-                        bgColor: '#ff00bf',
-                        padding: 3,
-                        display: 'ALWAYS'
-                    }
-                })
-                points.push({
-                    longitude: item.longitude,
-                    latitude: item.latitude
-                })
-                messageObj.polyline = [
-                    {
-                        points: points,
-                        color: '#9F24D0',
-                        width: 2
-                    }
-                ]
+        // changeDay(parentIndex: number, childIndex: number) {
+        //     const messageObj = this.messageList[parentIndex]
+        //     const locationData = messageObj.locationData
+        //     const points: IncludePpointsType = []
+        //     // 默认展示第一天
+        //     messageObj.longitude = locationData![0].location[0].longitude
+        //     messageObj.latitude = locationData![0].location[0].latitude
+        //     // 重制数据
+        //     messageObj.markers = []
+        //     messageObj.polyline = []
+        //     // 地图赋值第n天数据
+        //     locationData![childIndex].location.forEach((item, index) => {
+        //         // includePpoints
+        //         messageObj.includePpoints?.push({
+        //             longitude: item.longitude,
+        //             latitude: item.latitude
+        //         })
+        //         // 
+        //         messageObj.markers?.push({
+        //             id: Date.now() + index,
+        //             longitude: item.longitude,
+        //             latitude: item.latitude,
+        //             iconPath: xingzou,
+        //             width: 30,
+        //             height: 30,
+        //             callout: {
+        //                 content: item.city,
+        //                 color: '#fff',
+        //                 borderRadius: 3,
+        //                 borderColor: '#ff00bf',
+        //                 bgColor: '#ff00bf',
+        //                 padding: 3,
+        //                 display: 'ALWAYS'
+        //             }
+        //         })
+        //         points.push({
+        //             longitude: item.longitude,
+        //             latitude: item.latitude
+        //         })
+        //         messageObj.polyline = [
+        //             {
+        //                 points: points,
+        //                 color: '#9F24D0',
+        //                 width: 2
+        //             }
+        //         ]
 
-            })
+        //     })
 
-        },
+        // },
 
         // 根据大模型给的地图数据绘制地图
         makeUpMap(jsonMap: ModelMapType) {
@@ -292,6 +299,81 @@ export const useAppStore = defineStore('app', {
                 includePoints: includePoints
             }
             return oneDayMapData
+        },
+
+        async getContent(thread_id: string) {
+            console.log('thread_id', thread_id)
+            const res = await conversationDetailApi(thread_id)
+            console.log(res)
+            res.data.forEach((item) => {
+                // 如果是用户的消息
+                if (item.role === 'user') {
+                    this.newSessionData.push(item)
+                }
+                // 如果是工具名称
+                if (item.role === 'tool') {
+                    this.historyToolList?.push(item.content)
+                }
+                // 如果是模型消息
+                if (item.role === 'assistant') {
+                    this.newSessionData.push(item)
+                    // 处理工具名单
+                    let lastObj
+                    if (this.historyToolList.length > 0) {
+                        lastObj = this.newSessionData[this.newSessionData.length - 1]
+                        if (lastObj) {
+                            lastObj.toolList = this.historyToolList
+                        }
+                        this.historyToolList = []
+                    }
+                    // 处理地图位置（与哪条消息合并）
+                    if (this.mapDataList.length > 0) {
+                        if (lastObj?.toolList?.includes('map_data')) {
+                            lastObj.mapDataList = this.mapDataList
+                        }
+                    }
+                }
+                // 如果是工具返回结果
+                if (item.role === 'tool_result') {
+                    console.log('触发tool_result')
+                    let jsonMap: ModelMapType
+                    if (typeof item.content.null === 'string') {
+                        jsonMap = JSON.parse(item.content.null);
+                    } else {
+                        jsonMap = item.content.null; // 已是对象，直接使用
+                    }
+                    // 将每一天的地图数据返回存储到mapDataList
+                    if (jsonMap.type && jsonMap.type === "route_polyline") {
+                        console.log('jsonMap', jsonMap)
+                        const newMapItem = this.makeUpMap(jsonMap);
+                        console.log('newMapItem', newMapItem)
+                        console.log('Object.keys(newMapItem)', Object.keys(newMapItem))
+                        console.log('Object.keys(newMapItem).length', Object.keys(newMapItem).length)
+                        if (Object.keys(newMapItem).length > 0) {
+                            this.mapDataList.push(newMapItem)
+                            // const lastObj = newSessionData.value[newSessionData.value.length - 1]
+                            // console.log('lastObj', lastObj)
+                            // if (lastObj) {
+                            //     if (lastObj.mapDataList) {
+                            //         lastObj.mapDataList.push(newMapItem);
+                            //     } else {
+                            //         lastObj.mapDataList = [newMapItem]
+                            //     }
+                            //     console.log('lastObj.mapDataList', lastObj)
+                            // }
+                            // console.log('tool_result', lastObj)
+                        }
+                    }
+                }
+            })
+            console.log('dddddd')
+            console.log(this.newSessionData)
+            console.log('dddddd')
+            this.messageList = this.newSessionData
+            this.selectedThreadId = thread_id
+            this.historyToolList = []
+            this.newSessionData = []
+            this.switchHistoryAndChat = false
         }
 
     },
