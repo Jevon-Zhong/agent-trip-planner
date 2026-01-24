@@ -1,7 +1,6 @@
 export type CardDataType = {
     icon: string,
     title: string,
-    subtitle: string,
     prompt: string
 }[]
 

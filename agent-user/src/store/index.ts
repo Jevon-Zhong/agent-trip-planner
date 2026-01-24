@@ -1,4 +1,4 @@
-import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType } from '@/types'
+import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType, CardDataType } from '@/types'
 import xingzou from '@/static/xingzou.png'
 import { defineStore } from 'pinia'
 import { conversationDetailApi } from '@/api/request'
@@ -10,7 +10,10 @@ export const useAppStore = defineStore('app', {
         selectedThreadId: '',
         switchHistoryAndChat: false,
         messageList: [] as MessageListType[],//用户和模型的对话列表
+        CardDataList: [] as CardDataType,//用户和模型的对话列表
         isConnected: false, //ws是否连接上
+        loading: false, // 全局大loading
+        cardSkeleton: false, // 快捷提问的骨架屏
         socket: null, //socket 对象
         disabledStatus: false, // 模型对话是否禁用
         // 临时存储工具列表

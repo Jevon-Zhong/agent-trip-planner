@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
 import { useAppStore } from '@/store/index'
-import { conversationListApi } from "./api/request";
+import { conversationListApi, getQuickQuestionApi } from "./api/request";
 const appStore = useAppStore()
 
 onLaunch(async () => {
@@ -18,6 +18,11 @@ onLaunch(async () => {
   appStore.conversationList = res.data
   if (appStore.selectedThreadId != '') {
     appStore.getContent(appStore.selectedThreadId)
+  } else {
+    appStore.cardSkeleton = true
+    const res = await getQuickQuestionApi()
+    appStore.CardDataList = res.data
+    appStore.cardSkeleton = false
   }
   if (appStore.userInfo?.access_token) {
     appStore.connectWebSocket()

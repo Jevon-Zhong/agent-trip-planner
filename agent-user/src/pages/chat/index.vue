@@ -9,7 +9,7 @@
     <!-- 欢迎界面 -->
     <Welcome v-if="appStore.selectedThreadId == ''" />
     <!-- 快速卡片 -->
-    <GridCard :cardData="cardData" v-if="appStore.selectedThreadId == ''"/>
+    <GridCard :cardData="computedCardData" v-if="appStore.selectedThreadId == ''" />
     <!-- 输入框 -->
     <ChatInput />
     <!-- 对话窗口 -->
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 const { height, top, bottom } = uni.getStorageSync("buttonPosition")
 import type { CardDataType } from '@/types'
 import Welcome from './components/welcome.vue'
@@ -39,30 +39,60 @@ const appStore = useAppStore()
 const cardData = ref<CardDataType>([
     {
         icon: iconA,
-        title: '为我发现目的地',
-        subtitle: '寒假人少景美目的地',
-        prompt: '为我推荐几个适合寒假旅游人少景美的国内目的地'
+        title: '发现目的地',
+        prompt: ''
     },
     {
         icon: iconB,
-        title: '为我找便宜高铁票',
-        subtitle: '高铁优惠购票指南',
-        prompt: '帮我查询近期从大理到丽江的高铁票，并推荐最便宜的方案'
+        title: '查询高铁票',
+        prompt: ''
     },
     {
         icon: iconC,
-        title: '为我规划行程',
-        subtitle: '智能个性化行程推荐',
-        prompt: '昆明到丽江，两日游，为我规划一个行程'
+        title: '规划行程',
+        prompt: ''
     },
     {
         icon: iconD,
-        title: '为我查询目的地天气',
-        subtitle: '实时天气出行参考',
-        prompt: '帮我查询下近期成都的天气，并告诉我是否适合出行'
+        title: '查询目的地天气',
+        prompt: ''
     }
 
 ])
+
+const computedCardData = computed(() => {
+    if (appStore.CardDataList.length > 0) {
+        const data = appStore.CardDataList
+        for (let i = 0; i < data.length; i++) {
+            cardData.value[i].prompt = data[i].prompt
+        }
+        return cardData.value
+    } else {
+        return [
+            {
+                icon: iconA,
+                title: '发现目的地',
+                prompt: ''
+            },
+            {
+                icon: iconB,
+                title: '查询高铁票',
+                prompt: ''
+            },
+            {
+                icon: iconC,
+                title: '规划行程',
+                prompt: ''
+            },
+            {
+                icon: iconD,
+                title: '查询目的地天气',
+                prompt: ''
+            }
+
+        ]
+    }
+})
 
 const switchFn = () => {
     if (appStore.disabledStatus) return;
@@ -92,7 +122,7 @@ const switchFn = () => {
     .menu-style {
         display: flex;
         align-items: center;
-        height: v-bind('height+10+ "px"');
+        height: v-bind('height + 10 + "px"');
         padding-left: 20rpx;
         background-color: #fff;
 

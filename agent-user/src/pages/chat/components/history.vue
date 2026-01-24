@@ -4,7 +4,7 @@
         :overlayStyle="{ marginTop: `${bottom + 10}px` }" mode="left" zIndex="99">
         <view>
             <view class="user-info" @click="show = true">
-                <up-avatar :src="appStore.userInfo?.avatar" shape="square"></up-avatar>
+                <up-avatar :src="appStore.userInfo?.avatar" shape="circle"></up-avatar>
                 <!-- <image :src="appStore.userInfo?.avatar" mode="aspectFill" /> -->
                 <text>{{ appStore.userInfo?.nickname }}</text>
             </view>
@@ -33,7 +33,7 @@
             </up-list-item>
         </up-list>
     </up-popup>
-    <up-loading-page style="z-index: 99999999;" bg-color="#0000002e" :loading="loading"></up-loading-page>
+    <up-loading-page style="z-index: 99999999;" bg-color="#0000002e" :loading="appStore.loading"></up-loading-page>
     <up-notify message="删除失败" ref="uNotifyRef" type="error"></up-notify>
     <up-toast ref="uToastRef"></up-toast>
     <up-action-sheet :show="show" @select="selectClick" @close="show = false" :actions="actions"
@@ -45,7 +45,7 @@ import { reactive, ref } from 'vue';
 import { useAppStore } from '@/store/index'
 const appStore = useAppStore()
 import { onLoad } from '@dcloudio/uni-app';
-import { conversationDetailApi, conversationListApi, deleteConversationApi } from '@/api/request';
+import { conversationDetailApi, conversationListApi, deleteConversationApi, getQuickQuestionApi } from '@/api/request';
 import type { MapDataType, MessageListType, ModelMapType } from '@/types';
 const { top, bottom, right } = uni.getStorageSync("buttonPosition")
 const close = () => {
@@ -133,10 +133,14 @@ const close = () => {
 //     appStore.switchHistoryAndChat = false
 // }
 
-const newChat = () => {
+const newChat = async () => {
     appStore.switchHistoryAndChat = false
     appStore.messageList = []
     appStore.selectedThreadId = ''
+    appStore.cardSkeleton = true
+    const res = await getQuickQuestionApi()
+    appStore.CardDataList = res.data
+    appStore.cardSkeleton = false
 }
 
 // 使用 reactive 创建响应式对象  
@@ -149,12 +153,11 @@ const options1 = reactive([{
     }
 }]);
 
-const loading = ref(false)
 const uToastRef = ref()
 
 // 删除会话
 const deleteSession = async (sessionId: string) => {
-    loading.value = true
+    appStore.loading = true
     const res = await deleteConversationApi(sessionId)
     if (res.code === 200) {
         // 获取对话列表数据
@@ -165,7 +168,7 @@ const deleteSession = async (sessionId: string) => {
             appStore.getContent(appStore.conversationList[0].thread_id)
         }
         appStore.switchHistoryAndChat = false
-        loading.value = false
+        appStore.loading = false
     } else {
         uToastRef.value.show({
             type: 'error',

@@ -48,17 +48,17 @@ const appStore = useAppStore()
 
 
 // 请求地图数据
-const getLoacationData = async (content: string, index: number) => {
-    const messageObj = appStore.messageList[index]
-    messageObj.mapLoading = true
-    const res = await getLoacationDataApi({ content })
-    const mapId = String(Date.now() + index)
-    messageObj.mapId = mapId
-    messageObj.locationData = res.data
-    // 更新地图, 默认展示第一天数据
-    appStore.changeDay(index, 0)
-    messageObj.mapLoading = false
-}
+// const getLoacationData = async (content: string, index: number) => {
+//     const messageObj = appStore.messageList[index]
+//     messageObj.mapLoading = true
+//     const res = await getLoacationDataApi({ content })
+//     const mapId = String(Date.now() + index)
+//     messageObj.mapId = mapId
+//     messageObj.locationData = res.data
+//     // 更新地图, 默认展示第一天数据
+//     appStore.changeDay(index, 0)
+//     messageObj.mapLoading = false
+// }
 </script>
 
 <style scoped lang="less">

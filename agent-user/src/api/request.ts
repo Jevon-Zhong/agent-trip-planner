@@ -1,4 +1,4 @@
-import type { AIMessageType, ApiResponse, ConversationListType, createConversationType, LocationDataType, UserLoginResType, UserLoginType } from "@/types"
+import type { AIMessageType, ApiResponse, CardDataType, ConversationListType, createConversationType, LocationDataType, UserLoginResType, UserLoginType } from "@/types"
 import { useAppStore } from '@/store/index'
 // 公共域名
 const baseUrl = 'http://10.149.185.115:8000'
@@ -142,3 +142,7 @@ export const deleteConversationApi = (thread_id: string): Promise<ApiResponse<[]
     return request(`/chat/delete_conversation/${thread_id}`, 'DELETE')
 }
 
+// 获取快捷提问
+export const getQuickQuestionApi = (): Promise<ApiResponse<CardDataType>> => {
+    return request(`/chat/get_quick_question`, 'POST')
+}

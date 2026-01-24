@@ -1,6 +1,7 @@
 <template>
     <view class="outer">
-        <image src="/static/lvxing-logo.png" mode="widthFix" />
+        <image src="/static/ggg.gif" mode="widthFix" />
+        <!-- <up-avatar src="/static/ggg.gif" shape="circle" :size="180"></up-avatar> -->
         <text>Hi！我是你的AI旅行规划助手</text>
     </view>
 </template>
@@ -18,6 +19,8 @@
 
     image {
         width: 340rpx;
+        height: 340rpx;
+        border-radius: 50%;
     }
 
     text {
