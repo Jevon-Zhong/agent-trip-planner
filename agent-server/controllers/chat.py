@@ -10,7 +10,8 @@ from database import get_session
 from jwt import decode_token_ws, decode_jwt
 from models.conversations_list import ConversationsList
 from schemas.chat import ConversationsDataParams, LocationDataParams
-from services.chat import main_model, conversation_detail, location_data, delete_conversation_by_thread_id
+from services.chat import main_model, conversation_detail, location_data, delete_conversation_by_thread_id, \
+    quick_question
 from state_graph import ToolInfo, get_tool_list_ws, get_tool_list_http
 
 router = APIRouter(prefix="/chat", tags=["和大模型对话"])
@@ -83,6 +84,7 @@ async def delete_conversation(session_id:str, session: Session = Depends(get_ses
     res = await delete_conversation_by_thread_id(session_id,session, openid, tool_info)
     return response(res)
 
+
 """
 用户： 帮我规划一个西安三日游
 
@@ -97,5 +99,17 @@ async def delete_conversation(session_id:str, session: Session = Depends(get_ses
 async def get_location_data(req:LocationDataParams, openid:str=Depends(decode_jwt), tool_info:ToolInfo = Depends(get_tool_list_http)):
     print(req.content)
     res = await location_data(req.content, tool_info)
+    return response(res)
+
+# 根据用户提问记录生成用户可能会提问的快捷提问
+@router.post('/get_quick_question')
+async def get_quick_question(session: Session = Depends(get_session), openid:str=Depends(decode_jwt), tool_info:ToolInfo = Depends(get_tool_list_http)):
+    statement = select(ConversationsList).where(ConversationsList.openid == openid).order_by(desc(ConversationsList.created_at))
+    conversation_list = session.exec(statement).all()
+    content_arr = []
+    for conversation in conversation_list:
+        content_arr.append(conversation.title)
+    content:str = ','.join(content_arr)
+    res = await quick_question(content)
     return response(res)
 

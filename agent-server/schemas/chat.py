@@ -27,3 +27,5 @@ class LocationDataParams(BaseModel):
             raise ValueError(f"{info.field_name}的值不能为空")
         return v
 
+
+

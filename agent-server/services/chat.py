@@ -9,7 +9,7 @@ from langchain_classic.chains.question_answering.map_reduce_prompt import messag
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk, ToolMessage
 from sqlmodel import Session, select, delete, and_
 
-from model_prompt import prompt, map_prompt
+from model_prompt import prompt, map_prompt, question_prompt
 from models.conversations_list import ConversationsList
 from state_graph import ToolInfo, build_state_graph, tongyi_position
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -273,6 +273,32 @@ async def location_data(content: str, tool_info: ToolInfo):
             model=tongyi_position,
             system_prompt=map_prompt,
             tools=tool_info["all_tools"]
+        )
+        res = await agent.ainvoke(
+            {"messages": [{"role": "user", "content": content}]}  # type: ignore
+        )
+        print(res)
+        ai_msg = next(
+            (m for m in reversed(res["messages"]) if isinstance(m, AIMessage)),
+            None
+        )
+        print(ai_msg)
+        if ai_msg:
+            data = json.loads(ai_msg.content)
+            print(data)
+            return data
+        else:
+            return []
+    except Exception as e:
+        print(e)
+        return []
+
+# 获取快捷提问数据
+async def quick_question(content: str):
+    try:
+        agent = create_agent(
+            model=tongyi_position,
+            system_prompt=question_prompt
         )
         res = await agent.ainvoke(
             {"messages": [{"role": "user", "content": content}]}  # type: ignore
