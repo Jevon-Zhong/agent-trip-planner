@@ -182,6 +182,7 @@ const handleTouchStart = async (e: TouchEvent) => {
     // 获取ast url
     const res = await getAsrUrlApi()
     await appStore.connectASR(res.data)
+    uni.vibrateShort();
     // 开始录音（uniapp统一配置）
     recorderManager.start({
         duration: 60000, // 最长录音时间60秒
@@ -193,6 +194,8 @@ const handleTouchStart = async (e: TouchEvent) => {
     });
 };
 
+// 范围标记，上次在范围内为true，不在为false
+let rangeFlag = true
 // 触摸移动
 const handleTouchMove = (e: TouchEvent) => {
     if (!appStore.recordState.isRecording) return;
@@ -202,12 +205,22 @@ const handleTouchMove = (e: TouchEvent) => {
     const inRange = isPointInBtn(touch.clientX, touch.clientY);
 
     if (!inRange) {
+        // 如果上次在范围内就震动
+        if (rangeFlag) {
+            uni.vibrateShort();
+        }
+        rangeFlag = false
         // 移出范围 - 红色
         appStore.recordState.isOutOfRange = true;
         btnColor.value = '#ff3b30';
         btnBorderColor.value = btnColor.value
         statusText.value = '松手取消';
     } else {
+        // 如果上次在范围外就震动
+        if (!rangeFlag) {
+            uni.vibrateShort();
+        }
+        rangeFlag = true
         // 移回范围 - 蓝色
         appStore.recordState.isOutOfRange = false;
         btnColor.value = '#007aff';
