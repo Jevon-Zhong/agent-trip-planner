@@ -1,8 +1,8 @@
 import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType, CardDataType, RecordStateType, TencentASRRealTimeResponse } from '@/types'
 import xingzou from '@/static/xingzou.png'
 import { defineStore } from 'pinia'
-import { conversationDetailApi } from '@/api/request'
-const baseUrl_ws = 'ws://172.20.10.2:8000'
+import { conversationDetailApi, baseWsUrl } from '@/api/request'
+const baseUrl_ws = baseWsUrl
 export const useAppStore = defineStore('app', {
     state: () => ({
         userInfo: null as UserLoginResType | null,

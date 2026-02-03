@@ -19,10 +19,10 @@ onLaunch(async () => {
   if (appStore.selectedThreadId != '') {
     appStore.getContent(appStore.selectedThreadId)
   } else {
-    // appStore.cardSkeleton = true
-    // const res = await getQuickQuestionApi()
-    // appStore.CardDataList = res.data
-    // appStore.cardSkeleton = false
+    appStore.cardSkeleton = true
+    const res = await getQuickQuestionApi()
+    appStore.CardDataList = res.data
+    appStore.cardSkeleton = false
   }
   if (appStore.userInfo?.access_token) {
     appStore.connectWebSocket()

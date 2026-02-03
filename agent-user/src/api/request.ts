@@ -2,7 +2,7 @@ import type { AIMessageType, ApiResponse, CardDataType, ConversationListType, cr
 import { useAppStore } from '@/store/index'
 // 公共域名
 const baseUrl = 'http://172.20.10.2:8000'
-
+export const baseWsUrl = 'ws://172.20.10.2:8000'
 // 图片上传（头像）
 export const uploadImageApi = (url: string) => {
     return new Promise((resolve, reject) => {

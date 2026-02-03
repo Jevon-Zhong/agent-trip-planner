@@ -8,7 +8,10 @@
             <!-- 工具回复的消息 -->
             <view class="tool-message" v-if="item.role === 'assistant' && item.toolList && item.toolList.length">
                 <text>{{ item.toolThinking ? '分析思考中...' : '分析思考完毕' }}</text>
-                <ToolSteps :tool-list="item.toolList" />
+                <!-- <ToolSteps :tool-list="item.toolList" /> -->
+                <up-steps :current="item.toolList.length - 1" direction="column" :dot="true">
+                    <up-steps-item :title="step" v-for="(step, index) in item.toolList" />
+                </up-steps>
             </view>
             <!-- 模型回复的消息 -->
             <view class="ai-message" v-if="item.role === 'assistant' && item.content != ''">
