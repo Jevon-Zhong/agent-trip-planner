@@ -1,6 +1,14 @@
+import base64
+import hashlib
+import hmac
+import os
+import time
+import urllib
 import uuid
+from urllib.parse import urlencode
 
-from fastapi import APIRouter, WebSocket, Depends
+from dotenv import load_dotenv
+from fastapi import APIRouter, WebSocket, Depends, UploadFile
 from fastapi.encoders import jsonable_encoder
 from sqlmodel import Session, select, desc
 from starlette.websockets import WebSocketDisconnect
@@ -16,6 +24,10 @@ from state_graph import ToolInfo, get_tool_list_ws, get_tool_list_http
 
 router = APIRouter(prefix="/chat", tags=["和大模型对话"])
 
+load_dotenv()
+APPID = os.getenv("TENCENT_APPID")
+SECRET_ID = os.getenv("TENCENT_SECRET_ID")
+SECRET_KEY = os.getenv("TENCENT_SECRET_KEY")
 
 # 和模型对话（使用普通流失输出，在小程序会中断，所以使用websocket方式）
 @router.websocket('/send_message')
@@ -112,4 +124,70 @@ async def get_quick_question(session: Session = Depends(get_session), openid:str
     content:str = ','.join(content_arr)
     res = await quick_question(content)
     return response(res)
+
+# 腾讯云 ASR 域名常量
+ASR_PRE = "asr.cloud.tencent.com/asr/v2"
+
+# 生成腾讯云WebSocket鉴权签名（关键：腾讯云要求的鉴权方式）
+def generate_signature(params: dict[str, str | int | None]) -> str:
+    # 1.对除 signature 之外的所有参数按字典序进行排序，拼接请求 URL （不包含协议部分：wss://）作为签名原文
+    # 为什么必须排序？因为签名的生成对参数顺序敏感，如果前端 / 后端排序不一致，生成的签名就会不同，
+    # 导致腾讯云接口拒绝请求（返回签名无效）。这行代码就是为了保证参数顺序的唯一性，确保签名生成正确。
+    sorted_params = sorted(params.items(), key=lambda x: x[0])
+
+    # 2. 拼接为 key1=value1&key2=value2格式
+    query_str = "&".join([f"{k}={v}" for k, v in sorted_params])
+
+    # 3. 签名原文（query_str拼接上前缀）
+    signature_str = f"{ASR_PRE}/{APPID}?{query_str}"
+
+    # 4. 对签名原文使用 SecretKey 进行 HMAC-SHA1 加密，之后再进行 base64 编码
+        # 1. 将 字符串密钥 和 字符串原始数据 转换为 字节类型（必须步骤）
+    secret_key_bytes = SECRET_KEY.encode('utf-8')
+    raw_data_bytes = signature_str.encode('utf-8')
+
+        # 2. 初始化 HMAC-SHA1 实例，传入密钥和哈希算法
+    hmac_obj = hmac.new(
+        key=secret_key_bytes,  # 密钥字节
+        msg=raw_data_bytes,  # 待签名数据字节
+        digestmod=hashlib.sha1  # 指定哈希算法为 SHA1
+    )
+
+        # 3. 计算 HMAC-SHA1 二进制摘要（返回 bytes 类型）
+    hmac_sha1_bytes = hmac_obj.digest()
+
+        # 4 转换为 Base64 编码字符串（接口签名最常用）
+    signature_base64 = base64.b64encode(hmac_sha1_bytes).decode('utf-8')
+
+    # 5. 将 signature 值进行 urlencode（必须进行 URL 编码，编码函数必须要支持对+、=等特殊字符的编码，否则将导致鉴权失败偶发
+    return urllib.parse.quote(signature_base64)
+
+
+
+
+@router.get('/get_asr_ws_url')
+async def get_asr_ws_url(openid:str=Depends(decode_jwt)):
+    # 定义握手所需参数
+    timestamp = int(time.time())
+    params = {
+        "secretid": SECRET_ID, # 腾讯云注册账号的密钥 secretid，可通过 API 密钥管理页面 获取。
+        "timestamp": timestamp, # 当前 UNIX 时间戳，单位为秒。如果与当前时间相差过大，会引起签名过期错误。
+        "expired": timestamp + 60, # 签名的有效期截止时间 UNIX 时间戳，单位为秒。expired 必须大于 timestamp 且 expired - timestamp 小于90天。
+        "nonce": int(time.time() * 1000), # 随机正整数。用户需自行生成，最长10位。示例值：8743357
+        "engine_model_type": "16k_zh", # 引擎模型类型
+        "voice_id": str(uuid.uuid4()), # 音频流全局唯一标识，一个 WebSocket 连接对应一个，用户自己生成（推荐使用 UUID），最长128位。
+        "voice_format": 1, # 语音编码方式，可选，默认值为4。1：pcm；
+        "needvad": 1 # 0：关闭 vad，1：开启 vad，默认为0。如果语音分片长度超过60秒，会强制在60s断一次，建议客户音频超过60s时，开启 vad（人声检测切分功能），提升切分效果。
+    }
+
+    # 生成 signature
+    signature = generate_signature(params)
+
+    # 拼接最终 URL
+    params["signature"] = signature
+    query = "&".join([f"{k}={v}" for k, v in params.items()])
+
+    ws_url = f"wss://{ASR_PRE}/{APPID}?{query}"
+
+    return response(ws_url)
 
