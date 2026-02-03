@@ -1,8 +1,8 @@
-import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType, CardDataType } from '@/types'
+import type { AIMessageType, ConversationListType, MessageListType, UserLoginResType, IncludePpointsType, ModelMapType, MapDataType, MarkersType, CardDataType, RecordStateType, TencentASRRealTimeResponse } from '@/types'
 import xingzou from '@/static/xingzou.png'
 import { defineStore } from 'pinia'
 import { conversationDetailApi } from '@/api/request'
-const baseUrl_ws = 'ws://10.149.185.115:8000'
+const baseUrl_ws = 'ws://172.20.10.2:8000'
 export const useAppStore = defineStore('app', {
     state: () => ({
         userInfo: null as UserLoginResType | null,
@@ -16,6 +16,12 @@ export const useAppStore = defineStore('app', {
         cardSkeleton: false, // 快捷提问的骨架屏
         socket: null, //socket 对象
         disabledStatus: false, // 模型对话是否禁用
+        isVoice: false, // 当前是否是语音输入
+        recordState: {
+            isRecording: false, // 是否正在录音
+            isOutOfRange: false, // 触点是否超出按钮范围
+            btnRect: { top: 0, left: 0, width: 0, height: 0 } // 按钮位置信息
+        } as RecordStateType, // 录音状态
         // 临时存储工具列表
         toolList: [] as any,
         // 上一条是否是ai消息
@@ -25,7 +31,12 @@ export const useAppStore = defineStore('app', {
         // 临时存储对话历史数据的工具
         historyToolList: [] as string[],
         //临时存储每一天的地图路线数据
-        mapDataList: [] as MapDataType[]
+        mapDataList: [] as MapDataType[],
+
+        // 语音识别的socket
+        socketTask: null as any,
+        // 语音识别出的文字
+        voiceResText: ''
     }),
     getters: {
 
@@ -377,6 +388,73 @@ export const useAppStore = defineStore('app', {
             this.historyToolList = []
             this.newSessionData = []
             this.switchHistoryAndChat = false
+        },
+
+        // 连接腾讯云语音api
+        async connectASR(asrUrl: string) {
+            const asrSegment: any = [] // 存放每一段文本
+            this.socketTask = await wx.connectSocket({
+                url: asrUrl,
+                method: "GET"
+            })
+
+            // 监听收到消息
+            this.socketTask.onMessage((res: any) => {
+                const objRes: TencentASRRealTimeResponse = JSON.parse(res.data)
+                // 握手成功
+                if (objRes.code === 0) {
+                    // 语音返回结果
+                    if (objRes.result && objRes.result.voice_text_str) {
+                        const index: number = objRes.result.index
+                        const text: string = objRes.result.voice_text_str
+                        const sliceType: number = objRes.result.slice_type
+
+                        // 初始化该index段
+                        if (!asrSegment[index]) {
+                            asrSegment[index] = ""
+                        }
+                        // 段话开始识别。
+                        if (sliceType === 0) {
+                            asrSegment[index] = text
+                        }
+                        // 一段话识别中，voice_text_str 为非稳态结果（该段识别结果还可能变化）
+                        if (sliceType === 1) {
+                            asrSegment[index] = text;
+                        }
+                        // 一段话识别结束，voice_text_str 为稳态结果（该段识别结果不再变化）
+                        if (sliceType === 2) {
+                            asrSegment[index] = text
+                        }
+                        // 拼接完整语音
+                        this.voiceResText = asrSegment.filter(Boolean).join("")
+                        console.log('voiceResText', this.voiceResText)
+                    }
+                } else if (objRes.code === 4008) {
+                    uni.showToast({
+                        icon: "none",
+                        title: "没有听到你说话",
+                    });
+                } else {
+
+                    uni.showToast({
+                        icon: "none",
+                        title: "连接失败",
+                    });
+                }
+            })
+
+            // 连接成功
+            this.socketTask.onOpen(() => {
+                console.log("websocket连接上voice");
+            })
+            // 连接关闭
+            this.socketTask.onClose(() => {
+                console.log("连接关闭voice");
+            });
+            // 连接错误
+            this.socketTask.onError((err: any) => {
+                console.log("连接错误voice:", err);
+            });
         }
 
     },

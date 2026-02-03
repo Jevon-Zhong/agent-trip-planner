@@ -1,7 +1,7 @@
-import type { AIMessageType, ApiResponse, CardDataType, ConversationListType, createConversationType, LocationDataType, UserLoginResType, UserLoginType } from "@/types"
+import type { AIMessageType, ApiResponse, CardDataType, ConversationListType, createConversationType, LocationDataType, TencentASRRealTimeResponse, UserLoginResType, UserLoginType } from "@/types"
 import { useAppStore } from '@/store/index'
 // 公共域名
-const baseUrl = 'http://10.149.185.115:8000'
+const baseUrl = 'http://172.20.10.2:8000'
 
 // 图片上传（头像）
 export const uploadImageApi = (url: string) => {
@@ -12,6 +12,23 @@ export const uploadImageApi = (url: string) => {
             name: 'file',
             success: (res) => {
                 resolve(JSON.parse(res.data).data.upload_image_url)
+            },
+            fail: (err) => {
+                reject(err)
+            }
+        })
+    })
+}
+
+// 音频上传
+export const uploadAudioApi = (url: string) => {
+    return new Promise((resolve, reject) => {
+        uni.uploadFile({
+            url: `${baseUrl}/chat/single_audio_recognize`,
+            filePath: url,
+            name: 'audio_file',
+            success: (res) => {
+                resolve(res)
             },
             fail: (err) => {
                 reject(err)
@@ -133,7 +150,7 @@ export const createConversationApi = (): Promise<ApiResponse<createConversationT
 }
 
 // 获取经纬度数据
-export const getLoacationDataApi = (params: {content: string}): Promise<ApiResponse<LocationDataType>> => {
+export const getLoacationDataApi = (params: { content: string }): Promise<ApiResponse<LocationDataType>> => {
     return request(`/chat/get_location_data`, 'POST', params)
 }
 
@@ -145,4 +162,9 @@ export const deleteConversationApi = (thread_id: string): Promise<ApiResponse<[]
 // 获取快捷提问
 export const getQuickQuestionApi = (): Promise<ApiResponse<CardDataType>> => {
     return request(`/chat/get_quick_question`, 'POST')
+}
+
+// 获取腾讯云语音URL
+export const getAsrUrlApi = (): Promise<ApiResponse<string>> => {
+    return request(`/chat/get_asr_ws_url`, 'GET')
 }

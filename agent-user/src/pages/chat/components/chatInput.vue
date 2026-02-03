@@ -1,11 +1,12 @@
 <template>
     <view class="outer">
         <view class="box">
-            <textarea v-model="userMessage" placeholder="任何旅行相关问题都可以问我哦" fixed maxlength="500" :auto-height="isAutoHeight"
-                confirm-type="next" show-confirm-bar="false" placeholder-class="textarea-placeholder"
-                cursor-spacing="20" @linechange="lineChange" />
-            <button plain @click="sendMessage">
-                <image src="/static/send-icon.png" mode="widthFix" />
+            <textarea v-model="userMessage" placeholder="任何旅行相关问题都可以问我哦" fixed maxlength="500"
+                :auto-height="isAutoHeight" confirm-type="next" show-confirm-bar="false"
+                placeholder-class="textarea-placeholder" cursor-spacing="20" @linechange="lineChange"
+                @confirm="sendMessage" />
+            <button plain @click.self="voice">
+                <image src="/static/yuyin.png" mode="widthFix" />
             </button>
         </view>
     </view>
@@ -16,7 +17,7 @@ import { sendMessageApi } from '@/api/request';
 import type { EventType } from '@/types';
 import { useAppStore } from '@/store/index'
 const appStore = useAppStore()
-import { ref } from 'vue';
+import { getCurrentInstance, onMounted, reactive, ref } from 'vue';
 const userMessage = ref('')
 
 const sendMessage = () => {
@@ -32,6 +33,30 @@ const isAutoHeight = ref(true)
 const lineChange = (e: EventType) => {
     isAutoHeight.value = e.detail.lineCount >= 4 ? false : true
 }
+
+// 获取按钮位置信息
+const getBtnRect = async () => {
+    const instance = getCurrentInstance();
+    const query = uni.createSelectorQuery().in(instance!.proxy);
+    query
+        .select(".outer")
+        .boundingClientRect((data) => {
+            console.log('rect', data);
+            if (data) {
+                Object.assign(appStore.recordState.btnRect, data);
+            }
+        })
+        .exec();
+};
+
+const voice = () => {
+    appStore.isVoice = !appStore.isVoice
+    console.log(appStore.recordState)
+}
+
+onMounted(() => {
+    getBtnRect();
+});
 </script>
 
 <style scoped lang="less">
@@ -45,6 +70,7 @@ const lineChange = (e: EventType) => {
     background-color: #fff;
 
     .box {
+        height: 66rpx;
         display: flex;
         align-items: center;
         justify-content: space-between;

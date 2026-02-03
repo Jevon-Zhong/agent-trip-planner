@@ -1,21 +1,24 @@
 <template>
-    <!-- 顶部侧边栏按钮 -->
-    <view class="menu-outer">
-        <view class="button-top"></view>
-        <view class="menu-style">
-            <image src="/static/chat-list.png" @click="switchFn" mode="widthFix" />
+    <view>
+        <!-- 顶部侧边栏按钮 -->
+        <view class="menu-outer">
+            <view class="button-top"></view>
+            <view class="menu-style">
+                <image src="/static/chat-list.png" @click="switchFn" mode="widthFix" />
+            </view>
         </view>
+        <!-- 欢迎界面 -->
+        <Welcome v-if="appStore.selectedThreadId == ''" />
+        <!-- 快速卡片 -->
+        <GridCard :cardData="computedCardData" v-if="appStore.selectedThreadId == ''" />
+        <!-- 输入框 -->
+        <ChatInput v-show="!appStore.isVoice"/>
+        <Voice v-show="appStore.isVoice"/>
+        <!-- 对话窗口 -->
+        <Window />
+        <!-- 历史对话记录 -->
+        <History />
     </view>
-    <!-- 欢迎界面 -->
-    <Welcome v-if="appStore.selectedThreadId == ''" />
-    <!-- 快速卡片 -->
-    <GridCard :cardData="computedCardData" v-if="appStore.selectedThreadId == ''" />
-    <!-- 输入框 -->
-    <ChatInput />
-    <!-- 对话窗口 -->
-    <Window />
-    <!-- 历史对话记录 -->
-    <History />
 </template>
 
 <script setup lang="ts">
@@ -25,6 +28,7 @@ import type { CardDataType } from '@/types'
 import Welcome from './components/welcome.vue'
 import GridCard from "./components/gridCard.vue"
 import ChatInput from "./components/chatInput.vue"
+import Voice from "./components/voice.vue"
 import Window from "./components/window.vue"
 import History from "./components/history.vue"
 
@@ -103,8 +107,9 @@ const switchFn = () => {
 </script>
 
 <style scoped lang="less">
+
 .menu-outer {
-    height: v-bind('height + "px"');
+    // height: v-bind('height + "px"');
     // background-color: linear-gradient(#e7ebff, #dedfff);
     // background-color: #fff;
     position: fixed;
