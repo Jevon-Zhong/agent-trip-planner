@@ -6,7 +6,7 @@
         <view class="record-btn" id="record-btn-id" :style="{ backgroundColor: btnColor, borderColor: btnBorderColor }"
             @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd"
             @touchcancel="handleTouchCancel" ref="recordBtnRef">
-            <text v-show="!appStore.recordState.isRecording" class="btn-text">长按开始录音</text>
+            <text v-show="!appStore.recordState.isRecording" class="btn-text">按住说话</text>
             <button v-show="!appStore.recordState.isRecording" plain @touchstart.stop
                 @touchend="appStore.isVoice = !appStore.isVoice" @longpress.prevent.stop>
                 <image src="/static/jianpan.png" mode="widthFix" />
@@ -44,7 +44,7 @@ const statusText = ref('');
 // 新增：音频播放相关状态
 const recordFilePath = ref(''); // 保存录音文件路径
 // const isPlaying = ref(false); // 是否正在播放音频
-let audioContext: UniApp.InnerAudioContext | null = null; // 音频播放上下文
+// let audioContext: UniApp.InnerAudioContext | null = null; // 音频播放上下文
 
 // 录音管理器（使用uniapp统一API）
 let recorderManager: UniApp.RecorderManager | null = null;
@@ -228,7 +228,7 @@ const handleTouchCancel = () => {
 };
 
 // 停止录音
-const stopRecord = (isCancel = false) => {
+const stopRecord = async (isCancel = false) => {
     if (recorderManager && appStore.recordState.isRecording) {
         // 如果是主动取消或超出范围，标记状态
         if (isCancel || appStore.recordState.isOutOfRange) {
@@ -236,7 +236,12 @@ const stopRecord = (isCancel = false) => {
             appStore.voiceResText = ''
         }
         if (appStore.voiceResText.trim() !== '') {
-            sendMessageApi(appStore.voiceResText)
+            await sendMessageApi(appStore.voiceResText)
+            await nextTick(); // 改用 await 等待 DOM 更新
+            uni.pageScrollTo({
+                scrollTop: 999999,  // 足够大的滚动距离，自动滚到底部
+                duration: 300  // 滚动动画时长，可选
+            });
             appStore.voiceResText = ''
         }
         recorderManager.stop();

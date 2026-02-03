@@ -17,12 +17,17 @@ import { sendMessageApi } from '@/api/request';
 import type { EventType } from '@/types';
 import { useAppStore } from '@/store/index'
 const appStore = useAppStore()
-import { getCurrentInstance, onMounted, reactive, ref } from 'vue';
+import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue';
 const userMessage = ref('')
 
-const sendMessage = () => {
+const sendMessage = async () => {
     if (appStore.disabledStatus) return;
-    sendMessageApi(userMessage.value)
+    await sendMessageApi(userMessage.value)
+    await nextTick(); // 改用 await 等待 DOM 更新
+    uni.pageScrollTo({
+        scrollTop: 999999,  // 足够大的滚动距离，自动滚到底部
+        duration: 300  // 滚动动画时长，可选
+    });
     userMessage.value = ''
 }
 
