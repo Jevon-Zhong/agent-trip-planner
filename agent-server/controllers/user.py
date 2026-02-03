@@ -18,6 +18,8 @@ load_dotenv()
 # 读取环境变量
 APPID = os.getenv("APPID")
 SECRET = os.getenv("SECRET")
+HOST = os.getenv("HOST")
+PORT = int(os.getenv("PORT"))
 
 # 登陆请求地址
 code2Session = 'https://api.weixin.qq.com/sns/jscode2session'
@@ -96,7 +98,7 @@ async def upload_image(file: UploadFile):
         content = await file.read()
         f.write(content)
     # 将结果返回
-    return response({'upload_image_url': f"http://10.149.185.115:8000/images/{file_name}"})
+    return response({'upload_image_url': f"http://{HOST}:{PORT}/images/{file_name}"})
 
 
 # 测试解析token

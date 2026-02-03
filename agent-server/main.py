@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 
@@ -13,6 +14,12 @@ from fastapi.staticfiles import StaticFiles
 
 # 引入mcp工具
 from state_graph import client, tongyi, map_data
+
+load_dotenv()
+
+# 读取环境变量
+HOST = os.getenv("HOST")
+PORT = int(os.getenv("PORT"))
 
 # 生命周期管瘤
 @asynccontextmanager
@@ -49,4 +56,4 @@ app.mount("/images", StaticFiles(directory=image_folder))
 app.include_router(user_router)
 app.include_router(chat_router)
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="10.149.185.115", port=8000, reload=True)
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
