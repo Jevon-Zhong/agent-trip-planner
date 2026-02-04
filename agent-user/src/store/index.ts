@@ -316,6 +316,8 @@ export const useAppStore = defineStore('app', {
         },
 
         async getContent(thread_id: string) {
+            // 情况this.mapDataList
+            this.mapDataList = []
             console.log('thread_id', thread_id)
             const res = await conversationDetailApi(thread_id)
             console.log(res)

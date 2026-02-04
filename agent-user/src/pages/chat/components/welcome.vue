@@ -2,7 +2,7 @@
     <view class="outer">
         <image src="https://i.ibb.co/Rp8qBmqY/ggg.gif" mode="widthFix" />
         <!-- <up-avatar src="/static/ggg.gif" shape="circle" :size="180"></up-avatar> -->
-        <text>Hi！我是你的AI旅行规划助手</text>
+        <text>Hi！我是你的AI智能旅行规划助手</text>
     </view>
 </template>
 
