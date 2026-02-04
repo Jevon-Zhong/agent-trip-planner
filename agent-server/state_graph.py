@@ -26,6 +26,7 @@ load_dotenv()
 # 读取环境变量
 API_KEY = os.getenv("API_KEY")
 QQ_MAP_KEY = os.getenv("QQ_MAP_KEY")
+MODEL = os.getenv("MODEL")
 
 # 模型参数传递
 # tongyi = ChatTongyi(
@@ -35,14 +36,14 @@ QQ_MAP_KEY = os.getenv("QQ_MAP_KEY")
 # )
 
 tongyi = ChatOpenAI(
-    model="qwen-plus-2025-12-01",
+    model=MODEL,
     api_key=API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
 # 获取经纬度接口专用
 tongyi_position = ChatTongyi(
-    model='qwen-plus-2025-12-01',
+    model=MODEL,
     api_key=API_KEY
 )
 
