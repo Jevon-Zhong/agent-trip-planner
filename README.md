@@ -41,9 +41,9 @@
 - 点击按钮创建新对话
 - 左滑item点击删除对话
 
-<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%8E%86%E5%8F%B2%E5%AF%B9%E8%AF%9D%E7%AE%A1%E7%90%86.png?raw=true" alt="历史对话管理" style="zoom: 50%;" />
-
-
+<div align="center">
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%8E%86%E5%8F%B2%E5%AF%B9%E8%AF%9D%E7%AE%A1%E7%90%86.png?raw=true" width="250"/>
+</div>
 
 ### 🌈 新对话页面提问推荐卡片
 
