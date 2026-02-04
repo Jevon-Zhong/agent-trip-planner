@@ -109,10 +109,13 @@ def map_data(
         "to": to_location,
         "key": QQ_MAP_KEY,
     }
-    if waypoints:
+    if waypoints is not None and waypoints != "":
         if type(waypoints) != list:
+            print("waypoints进来了if:", waypoints)
+            # waypoints = [waypoints]
             params["waypoints"] = waypoints
         else:
+            print("waypoints进来了else:", waypoints)
             params["waypoints"] = ",".join(str(num) for num in waypoints)
     res = requests.get(url, params=params)
     data = res.json()
