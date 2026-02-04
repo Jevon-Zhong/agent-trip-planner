@@ -13,7 +13,7 @@
 - 新用户自动注册
 - 保留和区分每个账号的对话记录
 
-<center class="half">
+<center align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E7%99%BB%E9%99%86.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E9%80%80%E5%87%BA.png?raw=true" width="250"/>
 </center>
@@ -30,13 +30,9 @@
 - 骨架屏优化体验
 - 发送消息自动滚动到底部
 
-<center class="half">
-    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%9B%BE%E6%96%87%E5%B9%B6%E8%8C%82.png?raw=true" width="250"/>
+<div align="center">  <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%9B%BE%E6%96%87%E5%B9%B6%E8%8C%82.png?raw=true" width="250"/>
   	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%9C%B0%E5%9B%BE.png?raw=true" width="250"/>
-    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%B5%81%E5%BC%8F%E8%BE%93%E5%87%BA.gif?raw=true" width="250"/>
-</center>
-
-
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%B5%81%E5%BC%8F%E8%BE%93%E5%87%BA.gif?raw=true" width="250"/></div>
 
 ### 🗂️ 历史对话管理
 
@@ -55,7 +51,7 @@
 - 点击"换一换"调用大模型生成新的推荐提问
 - 点击提问推荐卡片，快速问答
 
-<center class="half">
+<center align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.gif?raw=true" width="250"/>
   	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%BF%AB%E9%80%9F%E6%8F%90%E9%97%AE.gif?raw=true" width="250"/>
@@ -69,7 +65,7 @@
 - 长按进行语音输入+松手发送消息
 - 长按+移出按钮范围+松手取消本次语音
 
-<center class="half">
+<center align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%9D%BE%E6%89%8B%E5%8F%96%E6%B6%88.png?raw=true" width="250"/>
   	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.gif?raw=true" width="250"/>
