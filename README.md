@@ -14,8 +14,8 @@
 - 保留和区分每个账号的对话记录
 
 <center class="half">
-    <img src="/Users/x2006201/Desktop/image/登陆.png" width="250"/>
-    <img src="/Users/x2006201/Desktop/image/退出.png" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E7%99%BB%E9%99%86.png?raw=true" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E9%80%80%E5%87%BA.png?raw=true" width="250"/>
 </center>
 
 
@@ -31,9 +31,9 @@
 - 发送消息自动滚动到底部
 
 <center class="half">
-    <img src="/Users/x2006201/Desktop/image/图文并茂.png" width="250"/>
-  	<img src="/Users/x2006201/Desktop/image/地图.png" width="250"/>
-    <img src="/Users/x2006201/Desktop/image/流式输出.gif" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%9B%BE%E6%96%87%E5%B9%B6%E8%8C%82.png?raw=true" width="250"/>
+  	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%9C%B0%E5%9B%BE.png?raw=true" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%B5%81%E5%BC%8F%E8%BE%93%E5%87%BA.gif?raw=true" width="250"/>
 </center>
 
 
@@ -45,7 +45,7 @@
 - 点击按钮创建新对话
 - 左滑item点击删除对话
 
-<img src="/Users/x2006201/Desktop/image/历史对话管理.png" alt="历史对话管理" style="zoom:67%;" />
+<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%8E%86%E5%8F%B2%E5%AF%B9%E8%AF%9D%E7%AE%A1%E7%90%86.png?raw=true" alt="历史对话管理" style="zoom:67%;" />
 
 
 
@@ -56,9 +56,9 @@
 - 点击提问推荐卡片，快速问答
 
 <center class="half">
-    <img src="/Users/x2006201/Desktop/image/新对话.png" width="250"/>
-    <img src="/Users/x2006201/Desktop/image/新对话.gif" width="250"/>
-  	<img src="/Users/x2006201/Desktop/image/快速提问.gif" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.png?raw=true" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.gif?raw=true" width="250"/>
+  	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%BF%AB%E9%80%9F%E6%8F%90%E9%97%AE.gif?raw=true" width="250"/>
 </center>
 
 
@@ -70,9 +70,9 @@
 - 长按+移出按钮范围+松手取消本次语音
 
 <center class="half">
-    <img src="/Users/x2006201/Desktop/image/语音.png" width="250"/>
-    <img src="/Users/x2006201/Desktop/image/松手取消.png" width="250"/>
-  	<img src="/Users/x2006201/Desktop/image/语音.gif" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.png?raw=true" width="250"/>
+    <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%9D%BE%E6%89%8B%E5%8F%96%E6%B6%88.png?raw=true" width="250"/>
+  	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.gif?raw=true" width="250"/>
 </center>
 
 
