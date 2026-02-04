@@ -1,8 +1,8 @@
 import type { AIMessageType, ApiResponse, CardDataType, ConversationListType, createConversationType, LocationDataType, TencentASRRealTimeResponse, UserLoginResType, UserLoginType } from "@/types"
 import { useAppStore } from '@/store/index'
 // 公共域名
-const baseUrl = 'http://172.20.10.2:8000'
-export const baseWsUrl = 'ws://172.20.10.2:8000'
+const baseUrl = 'http://127.0.0.1:8000'
+export const baseWsUrl = 'ws://127.0.0.1:8000'
 // 图片上传（头像）
 export const uploadImageApi = (url: string) => {
     return new Promise((resolve, reject) => {
