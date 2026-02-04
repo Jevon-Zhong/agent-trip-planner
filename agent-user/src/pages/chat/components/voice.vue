@@ -150,7 +150,8 @@ recorderManager.onStop((res) => {
     } else {
         // 新增：保存录音文件路径
         recordFilePath.value = res.tempFilePath;
-        statusText.value = '录音完成，可播放或删除录音';
+        // statusText.value = '录音完成，可播放或删除录音';
+        statusText.value = ''
         console.log('录音文件：', res);
         // 录音停止后，延迟上传（确保临时文件生成完成）
         // setTimeout(() => {
