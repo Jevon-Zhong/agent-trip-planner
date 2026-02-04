@@ -13,10 +13,10 @@
 - 新用户自动注册
 - 保留和区分每个账号的对话记录
 
-<center align="center">
+<div align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E7%99%BB%E9%99%86.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E9%80%80%E5%87%BA.png?raw=true" width="250"/>
-</center>
+</div>
 
 
 
@@ -41,7 +41,7 @@
 - 点击按钮创建新对话
 - 左滑item点击删除对话
 
-<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%8E%86%E5%8F%B2%E5%AF%B9%E8%AF%9D%E7%AE%A1%E7%90%86.png?raw=true" alt="历史对话管理" style="zoom:67%;" />
+<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%8E%86%E5%8F%B2%E5%AF%B9%E8%AF%9D%E7%AE%A1%E7%90%86.png?raw=true" alt="历史对话管理" style="zoom: 50%;" />
 
 
 
@@ -51,11 +51,11 @@
 - 点击"换一换"调用大模型生成新的推荐提问
 - 点击提问推荐卡片，快速问答
 
-<center align="center">
+<div align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%96%B0%E5%AF%B9%E8%AF%9D.gif?raw=true" width="250"/>
   	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E5%BF%AB%E9%80%9F%E6%8F%90%E9%97%AE.gif?raw=true" width="250"/>
-</center>
+</div>
 
 
 
@@ -65,11 +65,11 @@
 - 长按进行语音输入+松手发送消息
 - 长按+移出按钮范围+松手取消本次语音
 
-<center align="center">
+<div align="center">
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.png?raw=true" width="250"/>
     <img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E6%9D%BE%E6%89%8B%E5%8F%96%E6%B6%88.png?raw=true" width="250"/>
   	<img src="https://github.com/Jevon-Zhong/agent-trip-planner/blob/main/images/%E8%AF%AD%E9%9F%B3.gif?raw=true" width="250"/>
-</center>
+</div>
 
 
 
